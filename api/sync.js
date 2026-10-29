@@ -16,10 +16,42 @@ function storageKey(code) {
   return "tree:" + crypto.createHash("sha256").update(code).digest("hex");
 }
 
+const FLOWERS = new Set(["pink", "coral", "gold", "lilac"]);
+const BIRDS = new Set(["blue", "gold", "rose"]);
+
+function cleanName(v) {
+  return String(v || "").replace(/[<>&]/g, "").trim().slice(0, 24);
+}
+
+function cleanDecor(d) {
+  if (!d || typeof d !== "object") return {};
+  const o = {};
+  if (FLOWERS.has(d.flower)) o.flower = d.flower;
+  if (BIRDS.has(d.bird)) o.bird = d.bird;
+  if (d.swing) o.swing = true;
+  return o;
+}
+
+function cleanWatered(v) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(v || "")) ? String(v) : "";
+}
+
+function cleanSeen(seen) {
+  const miles = [];
+  const facts = [];
+  for (const m of (seen && seen.miles) || []) if ((m === 5 || m === 10 || m === 15) && !miles.includes(m)) miles.push(m);
+  for (const f of (seen && seen.facts) || []) {
+    const n = Number(f);
+    if (Number.isInteger(n) && n >= 1 && n <= 20 && !facts.includes(n)) facts.push(n);
+  }
+  return { miles, facts };
+}
+
 function fresh(resetAt) {
   return {
     best: {}, done: {}, unlockAll: false, history: [], days: [], skills: {}, words: {},
     resetAt: resetAt || 0, settingsAt: 0, pin: null, pinAt: 0,
+    childName: "", nameAt: 0, decor: {}, decorAt: 0, watered: "", seen: { miles: [], facts: [] },
   };
 }
 
@@ -40,9 +72,32 @@ function mergeSnapshots(local, remote) {
     S.pin = remote.pin;
     S.pinAt = remote.pinAt || 0;
   }
+  let childName = cleanName(S.childName);
+  let nameAt = S.nameAt || 0;
+  let decor = cleanDecor(S.decor);
+  let decorAt = S.decorAt || 0;
+  if (remote.childName && (remote.nameAt || 0) > nameAt) {
+    const next = cleanName(remote.childName);
+    if (next) {
+      childName = next;
+      nameAt = remote.nameAt || 0;
+    }
+  }
+  if (remote.decor && typeof remote.decor === "object" && (remote.decorAt || 0) > decorAt) {
+    decor = cleanDecor(remote.decor);
+    decorAt = remote.decorAt || 0;
+  }
   const rr = remote.resetAt || 0;
   const lr = S.resetAt || 0;
-  if (lr > rr) return S;
+  if (lr > rr) {
+    S.childName = childName;
+    S.nameAt = nameAt;
+    S.decor = decor;
+    S.decorAt = decorAt;
+    S.watered = cleanWatered(S.watered);
+    S.seen = cleanSeen(S.seen);
+    return S;
+  }
   if (rr > lr) {
     const pin = S.pin;
     const pinAt = S.pinAt;
@@ -50,6 +105,17 @@ function mergeSnapshots(local, remote) {
     S.pin = pin;
     S.pinAt = pinAt;
   }
+  S.childName = childName;
+  S.nameAt = nameAt;
+  S.decor = decor;
+  S.decorAt = decorAt;
+  S.seen = cleanSeen(S.seen);
+  const remoteWatered = cleanWatered(remote.watered);
+  if (remoteWatered && remoteWatered > cleanWatered(S.watered)) S.watered = remoteWatered;
+  else S.watered = cleanWatered(S.watered);
+  const remoteSeen = cleanSeen(remote.seen);
+  for (const m of remoteSeen.miles) if (!S.seen.miles.includes(m)) S.seen.miles.push(m);
+  for (const f of remoteSeen.facts) if (!S.seen.facts.includes(f)) S.seen.facts.push(f);
   const remoteBest = remote.best && typeof remote.best === "object" ? remote.best : {};
   for (const id in remoteBest) {
     const a = S.best[id];

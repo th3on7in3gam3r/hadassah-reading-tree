@@ -236,7 +236,46 @@ th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute
 .rule svg{width:18px;height:18px;flex:none}
 
 .blossom{transform-box:fill-box;transform-origin:center}
-.blossom.new{animation:pop .7s both}
+.blossom.new{animation:bloom .8s both}
+@keyframes bloom{0%{transform:scale(.2);opacity:0}60%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
+.crown.sway{transform-box:view-box;transform-origin:160px 150px;animation:sway 1.3s ease}
+@keyframes sway{30%{transform:rotate(-2deg)}70%{transform:rotate(2deg)}}
+.spark{animation:rise .9s ease-out both}
+@keyframes rise{from{transform:translate(155px,200px)}to{transform:translate(155px,36px);opacity:0}}
+.visitor.new{animation:pop .7s both}
+.sound{min-height:92px;transition:transform .15s}
+.sound:active,.tapbox:active,.opt:active,.step:active,.card:active,.btn:active{transform:scale(.97)}
+.sound.bounce{animation:pop .35s}
+.tapbox{transition:transform .15s,background .15s}
+.tapbox.grow{animation:pop .28s}
+.whole.glow{animation:glow .8s ease}
+@keyframes glow{40%{text-shadow:0 0 16px var(--sun)}}
+.tiles{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.slotrow{display:flex;gap:8px;justify-content:center;min-height:72px}
+.slot,.tile{min-width:52px;min-height:64px;border-radius:14px;border:3px solid var(--line);background:var(--bg);font-family:var(--display);font-weight:800;font-size:32px;display:flex;align-items:center;justify-content:center;touch-action:none}
+.slot{border-style:dashed}
+.slot.filled{border-style:solid;border-color:var(--leaf);background:var(--good-soft)}
+.tile{cursor:grab;background:var(--paper)}
+.tile.dragging{position:relative;z-index:3;cursor:grabbing}
+.seek{position:relative;min-height:220px;border-radius:18px;overflow:hidden;background:linear-gradient(#d7ebe3,#f4efe4)}
+.seek svg{width:100%;height:180px;display:block}
+.hid{position:absolute;min-height:48px;border:2px solid var(--line);background:var(--paper);border-radius:999px;padding:8px 12px;font-weight:800}
+.hid.right,.tile.right{background:var(--good-soft);border-color:var(--good)}
+.hid.wrong,.tile.wrong{background:var(--try-soft);border-color:var(--try)}
+.storyscene{width:100%;max-height:200px;border-radius:16px;background:var(--soft)}
+.story p.on{background:var(--sun-soft);border-radius:8px}
+.confetti{position:relative;height:0}
+.confetti i{position:absolute;left:50%;top:0;width:10px;height:14px;border-radius:8px;background:var(--blossom);animation:fall 1s ease-in both}
+@keyframes fall{to{transform:translate(var(--x),90px) rotate(40deg);opacity:0}}
+.flywrap{position:relative;display:flex;align-items:center;justify-content:center;gap:18px;min-height:120px}
+.flystar{animation:flystar .9s ease-in both}
+@keyframes flystar{to{transform:translate(70px,10px) scale(.4)}}
+.minitree{width:120px}
+.minitree svg{width:120px;height:auto}
+.buddy{display:flex;gap:10px;align-items:center;background:var(--sun-soft);border-radius:16px;padding:10px 12px}
+.buddy svg{width:42px;height:42px;flex:none}
+.picker{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.swatch{width:48px;height:48px;border-radius:50%;border:3px solid var(--paper);box-shadow:0 0 0 2px var(--line)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -506,6 +545,10 @@ const KEY="hadassah-reading-tree-v1";
 let S={best:{},done:{},unlockAll:false};
 try{const raw=localStorage.getItem(KEY);if(raw)S=Object.assign(S,JSON.parse(raw))}catch(e){}
 S.done=S.done||{};S.history=S.history||[];S.days=S.days||[];S.skills=S.skills||{};S.words=S.words||{};S.resetAt=S.resetAt||0;S.settingsAt=S.settingsAt||0;
+S.childName=S.childName||"";S.nameAt=S.nameAt||0;S.decor=S.decor||{};S.decorAt=S.decorAt||0;S.watered=S.watered||"";
+S.seen=S.seen||{miles:[],facts:[]};S.seen.miles=S.seen.miles||[];S.seen.facts=S.seen.facts||[];
+const childName=()=> (S.childName||"Hadassah").trim()||"Hadassah";
+const treeTitle=()=>childName()+"'s Reading Tree";
 const localIso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function save(){persist();schedulePush()}
@@ -543,9 +586,23 @@ function mergeRemote(r){
   let ch=false;
   const lp=pinRec();
   if(r.pin&&(!lp||((r.pinAt||0)>(lp.at||0)&&r.pin!==lp.h))){storePin(r.pin,r.pinAt||0);ch=true}
+  let childName=S.childName||"",nameAt=S.nameAt||0,decor=S.decor||{},decorAt=S.decorAt||0;
+  if(r.childName&&(r.nameAt||0)>nameAt){const next=String(r.childName).replace(/[<>&]/g,"").trim().slice(0,24);if(next){childName=next;nameAt=r.nameAt||0;ch=true}}
+  if(r.decor&&typeof r.decor==="object"&&(r.decorAt||0)>decorAt){
+    const d={};
+    if(FLOWERS[r.decor.flower])d.flower=r.decor.flower;
+    if(BIRDS[r.decor.bird])d.bird=r.decor.bird;
+    if(r.decor.swing)d.swing=true;
+    decor=d;decorAt=r.decorAt||0;ch=true;
+  }
   const rr=r.resetAt||0,lr=S.resetAt||0;
-  if(lr>rr)return ch;
-  if(rr>lr){S={best:{},done:{},unlockAll:false,history:[],days:[],skills:{},words:{},resetAt:rr,settingsAt:0};ch=true}
+  if(lr>rr){S.childName=childName;S.nameAt=nameAt;S.decor=decor;S.decorAt=decorAt;return ch}
+  if(rr>lr){S={best:{},done:{},unlockAll:false,history:[],days:[],skills:{},words:{},resetAt:rr,settingsAt:0,watered:"",seen:{miles:[],facts:[]}};ch=true}
+  S.childName=childName;S.nameAt=nameAt;S.decor=decor;S.decorAt=decorAt;
+  S.seen=S.seen||{miles:[],facts:[]};S.seen.miles=S.seen.miles||[];S.seen.facts=S.seen.facts||[];
+  if(/^\d{4}-\d{2}-\d{2}$/.test(r.watered||"")&&(!S.watered||r.watered>S.watered)){S.watered=r.watered;ch=true}
+  for(const m of (r.seen&&r.seen.miles)||[])if((m===5||m===10||m===15)&&!S.seen.miles.includes(m)){S.seen.miles.push(m);ch=true}
+  for(const f of (r.seen&&r.seen.facts)||[]){const n=+f;if(n>=1&&n<=20&&Number.isInteger(n)&&!S.seen.facts.includes(n)){S.seen.facts.push(n);ch=true}}
   for(const id in r.best||{}){const a=S.best[id],b=r.best[id];if(!b)continue;
     if(!a||b.stars>a.stars||(b.stars===a.stars&&((b.score||0)>(a.score||0)||(b.last||"")>(a.last||"")))){S.best[id]={...b,tries:Math.max(b.tries||0,a?a.tries||0:0)};ch=true}
     else if((b.tries||0)>(a.tries||0)){a.tries=b.tries;ch=true}}
@@ -619,6 +676,32 @@ function say(text,rate,onEnd){
   if(!canSpeak)return;
   try{stopTalk();const u=new SpeechSynthesisUtterance(text);u.rate=rate||0.85;u.pitch=1.05;if(onEnd)u.onend=onEnd;speechSynthesis.speak(u)}catch(e){}
 }
+const reduceMotion=matchMedia("(prefers-reduced-motion:reduce)").matches;
+const MUTEKEY="hadassah-reading-tree-mute";
+const soundOn=()=>{try{return localStorage.getItem(MUTEKEY)!=="1"}catch(e){return true}};
+const setSoundOn=on=>{try{on?localStorage.removeItem(MUTEKEY):localStorage.setItem(MUTEKEY,"1")}catch(e){}};
+let audioCtx=null;
+function tone(freq,dur,type,delay,gain){
+  if(!soundOn()||reduceMotion)return;
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+    audioCtx=audioCtx||new AC();
+    if(audioCtx.state==="suspended")audioCtx.resume();
+    const t0=audioCtx.currentTime+(delay||0),o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.type=type||"sine";o.frequency.value=freq;
+    g.gain.setValueAtTime(0.0001,t0);
+    g.gain.exponentialRampToValueAtTime(gain||0.07,t0+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+(dur||0.2));
+    o.connect(g);g.connect(audioCtx.destination);o.start(t0);o.stop(t0+(dur||0.2)+0.03);
+  }catch(e){}
+}
+function chime(kind){
+  if(kind==="bloom"){tone(523,.18,"sine",0,.07);tone(659,.22,"sine",.08,.06);tone(784,.3,"sine",.16,.05)}
+  else if(kind==="whoosh"){tone(320,.1,"triangle",0,.05);tone(540,.16,"sine",.05,.04)}
+  else if(kind==="click")tone(880,.05,"triangle",0,.05);
+  else if(kind==="rustle"){tone(196,.12,"triangle",0,.04);tone(262,.14,"sine",.06,.03)}
+  else if(kind==="tap")tone(698,.06,"sine",0,.04);
+}
 
 /* =================== ICONS =================== */
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -640,21 +723,40 @@ const ICON={
 
 /* =================== THE MYRTLE TREE =================== */
 const SPOTS=Array.from({length:MAXSTARS},(_,i)=>{const r=Math.sqrt((i+.5)/MAXSTARS),a=i*2.39996;return[160+r*118*Math.cos(a),86+r*64*Math.sin(a)]});
+const FACTS=[
+  "A myrtle tree stays green all year, and its little blossoms smell sweet.",
+  "In Bible times, myrtle branches were a sign of joy.",
+  "A myrtle can send up new shoots after a hard season.",
+  "Bees love the sweet smell of myrtle blossoms."
+];
+const FLOWERS={pink:"var(--blossom)",coral:"#e07a5f",gold:"#efb12a",lilac:"#b48ad4"};
+const BIRDS={blue:"#3d63b8",gold:"#c4922a",rose:"#e0648c"};
+const BUDDY='<svg viewBox="0 0 48 48" aria-hidden="true"><ellipse cx="22" cy="28" rx="12" ry="8" fill="#3d63b8"/><circle cx="32" cy="22" r="6" fill="#3d63b8"/><polygon points="38,20 46,24 38,27" fill="#efb12a"/><circle cx="34" cy="21" r="1.2" fill="#1d2a23"/></svg>';
 function treeSvg(count,fresh){
+  const bloom=FLOWERS[(S.decor&&S.decor.flower)||"pink"]||FLOWERS.pink;
   const crown=[[160,72,58],[104,96,46],[216,96,46],[128,52,40],[192,52,40],[160,116,48],[70,112,28],[250,112,28]];
   const leaves=crown.map(([x,y,r],i)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="var(--${i%2?"leaf2":"leaf"})"/>`).join("");
   const shown=Math.min(count,MAXSTARS);
   const blossoms=SPOTS.map(([x,y],i)=>{
     if(i>=shown)return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="var(--blossom-soft)" opacity=".7"/>`;
-    const petals=[0,72,144,216,288].map(d=>{const t=d*Math.PI/180;return `<circle cx="${(x+3.8*Math.cos(t)).toFixed(1)}" cy="${(y+3.8*Math.sin(t)).toFixed(1)}" r="3.3" fill="var(--blossom)"/>`}).join("");
+    const petals=[0,72,144,216,288].map(d=>{const t=d*Math.PI/180;return `<circle cx="${(x+3.8*Math.cos(t)).toFixed(1)}" cy="${(y+3.8*Math.sin(t)).toFixed(1)}" r="3.3" fill="${bloom}"/>`}).join("");
     const isNew=i>=shown-fresh;
     return `<g class="blossom ${isNew?"new":""}" style="animation-delay:${isNew?(i-(shown-fresh))*0.15:0}s">${petals}<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="var(--sun)"/></g>`;
   }).join("");
+  const miles=(S.seen&&S.seen.miles)||[];
+  const birdC=BIRDS[(S.decor&&S.decor.bird)||"blue"]||BIRDS.blue;
+  const bird=count>=5?`<g class="visitor ${miles.includes(5)?"":"new"}" transform="translate(236,84)"><ellipse cx="0" cy="4" rx="11" ry="7" fill="${birdC}"/><circle cx="9" cy="0" r="5.5" fill="${birdC}"/><polygon points="14,-1 20,2 14,5" fill="#efb12a"/></g>`:"";
+  const fly=count>=10?`<g class="visitor ${miles.includes(10)?"":"new"}" transform="translate(70,58)"><ellipse cx="-7" cy="0" rx="7" ry="9" fill="#e0648c"/><ellipse cx="7" cy="0" rx="7" ry="9" fill="#efb12a"/><rect x="-1.2" y="-7" width="2.4" height="16" rx="1" fill="#1d2a23"/></g>`:"";
+  const bow=count>=15?`<g class="visitor ${miles.includes(15)?"":"new"}"><path d="M78 148 A82 70 0 0 1 242 148" fill="none" stroke="#e0648c" stroke-width="4"/><path d="M88 148 A72 60 0 0 1 232 148" fill="none" stroke="#efb12a" stroke-width="4"/><path d="M98 148 A62 50 0 0 1 222 148" fill="none" stroke="#5f9e78" stroke-width="4"/></g>`:"";
+  const swing=S.decor&&S.decor.swing?`<path d="M146 108 L132 156 M154 108 L168 156" stroke="#7b5a43" stroke-width="2"/><rect x="126" y="154" width="48" height="7" rx="3" fill="#7b5a43"/>`:"";
+  const spark=fresh>0?`<circle class="spark" r="5" fill="${bloom==="var(--blossom)"?"var(--sun)":bloom}"/>`:"";
   return `<svg viewBox="0 0 320 222" role="img" aria-label="Myrtle tree with ${count} blossoms">
+    <g class="${fresh>0?"crown sway":""}">
     <path d="M150 220 C152 180 150 160 156 128 L164 128 C170 160 168 180 172 220 Z" fill="var(--bark)"/>
     <path d="M158 140 C140 128 120 118 100 110 M162 136 C182 124 200 116 220 108 M160 132 L160 96" stroke="var(--bark)" stroke-width="7" fill="none" stroke-linecap="round"/>
     <ellipse cx="160" cy="219" rx="90" ry="4" fill="var(--line)"/>
-    ${leaves}${blossoms}</svg>`;
+    ${leaves}${bow}${blossoms}${swing}${bird}${fly}${spark}
+    </g></svg>`;
 }
 
 /* =================== VIEWS =================== */
@@ -676,14 +778,24 @@ function home(){
   const here=currentUnit();
   const streak=calcStreak();
   const badgesGot=badgeList().filter(b=>b.got).length;
+  const today=localIso(new Date());
+  const watered=S.watered===today;
+  const bloomsToday=S.history.filter(h=>h.d===today).reduce((a,h)=>a+(h.stars||0),0);
+  const goalN=Math.min(2,bloomsToday);
+  const yest=new Date();yest.setDate(yest.getDate()-1);
+  const missed=S.days.length&&S.days[S.days.length-1]<localIso(yest);
+  const fact=UNITS.find(u=>unitStars(u)===unitMax(u)&&!S.seen.facts.includes(u.n));
+  const buddy=fresh>0?"Your tree is getting stronger!":watered?"Thank you for the water!":"I like reading with you.";
   const units=UNITS.map(u=>{
     const open=unitOpen(u.n);
+    const st=unitStars(u),mx=unitMax(u),pct=Math.round(100*st/mx);
     const head=`<div class="unithead"><div class="t"><span class="eyebrow">Unit ${u.n}</span><h2>${esc(u.title)}</h2><span class="sub">${esc(u.sub)}</span></div>
-      <div class="row" style="justify-content:flex-end">${u.n===here&&open?`<span class="chip">You are here</span>`:""}${open?`<span class="chip count">${unitStars(u)} of ${unitMax(u)} stars</span>`:""}</div></div>`;
+      <div class="row" style="justify-content:flex-end">${u.n===here&&open?`<span class="chip">You are here</span>`:""}${open?`<span class="chip count">${st} of ${mx} stars</span>`:""}</div></div>`;
     if(!open){
       const prev=unitOf(u.n-1);
       return `<section class="unit locked">${head}<p class="lockmsg">${ICON.lock} Earn ${UNLOCK_AT} stars in Unit ${prev.n} to open this unit. (${unitStars(prev)} so far)</p></section>`;
     }
+    const bar=`<div class="track" role="img" aria-label="Unit ${u.n} is ${pct} percent of the way to all its stars"><div class="fill" style="width:${pct}%"></div></div>${pct>=75&&pct<100?`<p class="tip">Unit ${u.n} almost complete!</p>`:""}`;
     const steps=[
       ...(u.vowels?[stepBtn(`data-act="vowels" data-u="${u.n}"`,"Warm-up","Vowel sounds",starMark(`u${u.n}-vowel`))]:[]),
       stepBtn(`data-act="cards" data-u="${u.n}"`,"1 · Learn","Sound cards",doneMark(`u${u.n}-cards`)),
@@ -692,7 +804,7 @@ function home(){
       stepBtn(`data-act="trick" data-u="${u.n}"`,"4 · Trick words","Find the word",starMark(`u${u.n}-trick`)),
       ...u.stories.map((s,i)=>stepBtn(`data-story="${s.id}"`,`${5+i} · ${s.kind} story`,s.title,starMark(s.id)))
     ].join("");
-    return `<section class="unit ${u.n===here?"here":""}">${head}<div class="steps">${steps}</div></section>`;
+    return `<section class="unit ${u.n===here?"here":""}">${head}${bar}<div class="steps">${steps}</div></section>`;
   }).join("");
 
   const shelf=LEVELS.map(L=>{
@@ -704,12 +816,25 @@ function home(){
     return `<div class="levelhead"><span class="eyebrow">Level ${L.n}</span><h3>${L.name}</h3>${note}</div><div class="cards">${cards}</div>`;
   }).join("");
 
-  go(`<header class="hero"><h1>Hadassah's Reading Tree</h1>
-      <p>Hadassah means <b>myrtle tree</b>. Practice your sounds, read the stories, and watch your tree bloom.</p></header>
+  document.title=treeTitle();
+  const decorPick=total>=5&&!S.decor.flower?`<div class="picker">${Object.entries(FLOWERS).map(([k,c])=>`<button class="swatch" data-flower="${k}" style="background:${c.startsWith("var")?"#e0648c":c}" aria-label="${k} flowers"></button>`).join("")}</div><p class="tip">Pick a flower color for your tree.</p>`
+    :total>=10&&!S.decor.bird?`<div class="picker">${Object.keys(BIRDS).map(k=>`<button class="btn" data-bird="${k}">${k} bird</button>`).join("")}</div>`
+    :total>=15&&!S.decor.swing?`<button class="btn" id="swing">Add a swing</button>`:"";
+  go(`<header class="hero"><h1>${esc(treeTitle())}</h1>
+      <p>${childName()==="Hadassah"?"Hadassah means <b>myrtle tree</b>. ":""}Practice your sounds, read the stories, and watch your tree bloom.</p></header>
     <div class="treecard">${treeSvg(total,fresh)}
       <div class="tally"><span class="n">${total}</span> blossoms</div>
+      <div class="buddy">${BUDDY}<span>${esc(buddy)}</span></div>
       <div class="rule">Every ${starSvg(true)} you earn grows 1 blossom.</div>
-      ${streak>=2?`<div class="rule">${ICON.sun} <b>${streak} days in a row!</b> Keep it going.</div>`:""}</div>
+      <p class="tip">Today's goal: <b>${goalN} of 2</b> blossoms</p>
+      <div class="track" style="width:100%"><div class="fill" style="width:${goalN/2*100}%"></div></div>
+      ${streak>=2?`<div class="rule">${ICON.sun} <b>${streak} days in a row!</b> Keep it going.</div>`:""}
+      ${missed?`<div class="rule">Your tree missed you yesterday!</div>`:""}
+      ${watered?`<div class="rule">The tree had a drink today.</div>`:`<div class="rule">Come water your tree today.</div><button class="btn" id="water">Water the tree</button>`}
+      ${decorPick}
+      <button class="linkbtn" id="sound">${soundOn()?"Sound on":"Sound off"}</button>
+    </div>
+    ${fact?`<section class="page" style="gap:8px"><h3>A hidden bud</h3><p>${esc(FACTS[(fact.n-1)%FACTS.length])}</p><button class="btn" id="factok" data-u="${fact.n}">How lovely!</button></section>`:""}
     <div class="sectionhead"><span class="eyebrow">Phonics</span><h2>Sound Units</h2><p>Do the steps in order. Each story uses the sounds from its unit.</p></div>
     ${units}
     <p class="later">More units are on the way as you get there.</p>
@@ -723,6 +848,19 @@ function home(){
     if(a==="vowels")vowels(u);else if(a==="cards")cards(u);else if(a==="tap")tapRead(u,0);else wordGame(u,a);
   });
   document.getElementById("grown").onclick=()=>gate();
+  const water=document.getElementById("water");
+  if(water)water.onclick=()=>{S.watered=localIso(new Date());save();chime("rustle");home()};
+  document.getElementById("sound").onclick=()=>{setSoundOn(!soundOn());if(soundOn())chime("tap");home()};
+  app.querySelectorAll("[data-flower]").forEach(b=>b.onclick=()=>{S.decor=Object.assign({},S.decor,{flower:b.dataset.flower});S.decorAt=Date.now();save();chime("bloom");home()});
+  app.querySelectorAll("[data-bird]").forEach(b=>b.onclick=()=>{S.decor=Object.assign({},S.decor,{bird:b.dataset.bird});S.decorAt=Date.now();save();chime("bloom");home()});
+  const swing=document.getElementById("swing");
+  if(swing)swing.onclick=()=>{S.decor=Object.assign({},S.decor,{swing:true});S.decorAt=Date.now();save();chime("click");home()};
+  const factok=document.getElementById("factok");
+  if(factok)factok.onclick=()=>{const n=+factok.dataset.u;if(!S.seen.facts.includes(n))S.seen.facts.push(n);save();home()};
+  let sawMile=false;
+  [5,10,15].forEach(m=>{if(total>=m&&!S.seen.miles.includes(m)){S.seen.miles.push(m);sawMile=true}});
+  if(sawMile)save();
+  if(fresh>0)chime("bloom");
 }
 
 /* ---- Warm-up: vowel sounds ---- */
@@ -785,11 +923,19 @@ function cards(u){
       <p class="lead">Say the sound. Then tap the card to hear the key word.</p>
       <div class="soundgrid">${u.cards.map(([p,k],i)=>`<button class="sound" data-i="${i}" aria-label="${esc(p)}, as in ${esc(k)}"><span class="pat">${esc(p)}</span><span class="kw">${hl(p,k)}</span></button>`).join("")}</div>
     </section>
-    <div class="center"><button class="btn go" id="next">Next: Tap and read</button></div>`);
+    <div class="center"><button class="btn" id="withme">Say it with me</button><button class="btn go" id="next">Next: Tap and read</button></div>`);
   S.done[`u${u.n}-cards`]=true;save();
   document.getElementById("back").onclick=home;
   document.getElementById("next").onclick=()=>tapRead(u,0);
-  app.querySelectorAll(".sound").forEach(b=>b.onclick=()=>{b.classList.add("heard");say(u.cards[+b.dataset.i][1],0.75)});
+  let withI=0;
+  document.getElementById("withme").onclick=()=>{
+    const card=u.cards[withI%u.cards.length];
+    const el=app.querySelector(`.sound[data-i="${withI%u.cards.length}"]`);
+    if(el){el.classList.add("heard","bounce");setTimeout(()=>el.classList.remove("bounce"),400)}
+    say(card[0].replace(/^-/,"")+", "+card[1],0.7);
+    chime("tap");withI++;
+  };
+  app.querySelectorAll(".sound").forEach(b=>b.onclick=()=>{b.classList.add("heard","bounce");chime("tap");setTimeout(()=>b.classList.remove("bounce"),400);say(u.cards[+b.dataset.i][1],0.75)});
 }
 
 /* ---- Step 2: tap and read ---- */
@@ -817,8 +963,8 @@ function tapRead(u,i){
   const hear=document.getElementById("hear"),next=document.getElementById("next");
   boxes.forEach((b,k)=>b.onclick=()=>{
     if(k!==lit)return;
-    b.classList.add("lit");dots[k].classList.add("lit");lit++;
-    if(lit===parts.length){document.getElementById("whole").classList.remove("dim");hear.disabled=false;next.disabled=false;next.focus()}
+    b.classList.add("lit","grow");dots[k].classList.add("lit");chime("tap");lit++;
+    if(lit===parts.length){const whole=document.getElementById("whole");whole.classList.remove("dim");whole.classList.add("glow");chime("whoosh");hear.disabled=false;next.disabled=false;next.focus()}
   });
   hear.onclick=()=>say(word,0.7);
   next.onclick=()=>{if(i<u.tap.length-1)tapRead(u,i+1);else{S.done[`u${u.n}-tap`]=true;save();wordGame(u,"spell")}};
@@ -826,24 +972,81 @@ function tapRead(u,i){
 
 /* ---- Steps 3 & 4: spell it / find the trick word ---- */
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function wordGame(u,kind,i=0,firsts=[]){
-  const spell=kind==="spell";
-  const list=spell?u.spell:u.trick;
-  const it=list[i];
-  const target=it[0];
-  const sentence=spell?it[3]:it[1];
-  let opts;
-  if(spell)opts=shuffle([it[0],it[1],it[2]]);
-  else opts=shuffle([target,...shuffle(list.map(x=>x[0]).filter(w=>w!==target)).slice(0,2)]);
+function wordGame(u,kind,i=0,firsts=[]){if(kind==="spell")spellTiles(u,i,firsts);else trickSeek(u,i,firsts)}
+function spellTiles(u,i=0,firsts=[]){
+  const list=u.spell,it=list[i],target=it[0],letters=target.split("");
+  const tiles=shuffle(letters.map((ch,n)=>({ch,n})));
   const dots=list.map((_,k)=>`<span class="dot ${k<i?"done":k===i?"now":""}"></span>`).join("");
-  const sent=esc(sentence).replace("___",'<span class="blank"></span>');
+  const sent=esc(it[3]).replace("___",'<span class="blank"></span>');
   go(`<div class="bar">${backBtn()}<div class="dots" role="img" aria-label="Word ${i+1} of ${list.length}">${dots}</div></div>
     <section class="page">
-      <span class="skill">${spell?"Spell it":u.trickLabel}</span>
-      <p class="q">${spell?"Listen. Which one is spelled right?":"Listen. Find the word you hear."}</p>
+      <span class="skill">Spell it</span>
+      <p class="q">Listen. Drag each letter into the word. You can tap a letter too.</p>
       ${canSpeak?`<button class="bigsay" id="sayit" aria-label="Hear the word again">${ICON.speak}</button>`:""}
       <p class="sentence">${sent}</p>
-      <div class="opts words">${opts.map((o,k)=>`<button class="opt" data-k="${k}">${esc(o)}</button>`).join("")}</div>
+      <div class="slotrow" id="slots">${letters.map((_,n)=>`<div class="slot" id="slot${n}"></div>`).join("")}</div>
+      <div class="tiles" id="tiles">${tiles.map(t=>`<button class="tile" data-n="${t.n}">${esc(t.ch)}</button>`).join("")}</div>
+      <div id="fb"></div>
+    </section>`);
+  document.getElementById("back").onclick=home;
+  const speakIt=()=>say(target,0.7);
+  const sb=document.getElementById("sayit");if(sb)sb.onclick=speakIt;
+  setTimeout(speakIt,250);
+  let placed=0,tried=false;
+  const fb=document.getElementById("fb");
+  function win(){
+    const got=!tried,last=i===list.length-1;
+    chime("whoosh");
+    fb.innerHTML=`<div class="feedback ok"><b>${got?"You got it!":"Yes! You found it."}</b><div><button class="btn go" id="next">${last?"See my stars":"Next word"}</button></div></div>`;
+    const n=document.getElementById("next");n.focus();
+    n.onclick=()=>last?finish({id:`u${u.n}-spell`,title:`Unit ${u.n}: Spell it`,firsts:[...firsts,got],again:()=>spellTiles(u),unit:u}):spellTiles(u,i+1,[...firsts,got]);
+  }
+  function take(btn){
+    if(btn.disabled)return;
+    const ch=letters[btn.dataset.n];
+    if(ch===letters[placed]){
+      const slot=document.getElementById("slot"+placed);
+      slot.textContent=ch;slot.classList.add("filled");
+      btn.disabled=true;btn.style.visibility="hidden";
+      chime("click");placed++;
+      if(placed===letters.length)win();
+    }else{
+      if(!tried){S.words[target]=(S.words[target]||0)+1;save()}
+      tried=true;btn.classList.add("wrong","shake");
+      setTimeout(()=>btn.classList.remove("wrong","shake"),400);
+      fb.innerHTML=`<div class="feedback hint"><b>Not quite. Try again!</b><span>Listen again and tap the next letter.</span></div>`;
+      speakIt();
+    }
+  }
+  app.querySelectorAll(".tile").forEach(btn=>{
+    let ox=0,oy=0,drag=false;
+    btn.onpointerdown=e=>{if(btn.disabled)return;drag=true;ox=e.clientX;oy=e.clientY;btn.setPointerCapture(e.pointerId);btn.classList.add("dragging")};
+    btn.onpointermove=e=>{if(!drag)return;btn.style.transform=`translate(${e.clientX-ox}px,${e.clientY-oy}px)`};
+    btn.onpointerup=e=>{
+      if(!drag)return;drag=false;btn.classList.remove("dragging");btn.style.transform="";
+      const slot=document.getElementById("slot"+placed);
+      const r=slot?slot.getBoundingClientRect():null;
+      const moved=Math.hypot(e.clientX-ox,e.clientY-oy)>8;
+      const near=r&&e.clientX>r.left-24&&e.clientX<r.right+24&&e.clientY>r.top-24&&e.clientY<r.bottom+24;
+      if(!moved||near)take(btn);
+    };
+  });
+}
+function trickSeek(u,i=0,firsts=[]){
+  const list=u.trick,it=list[i],target=it[0];
+  const opts=shuffle([target,...shuffle(list.map(x=>x[0]).filter(w=>w!==target)).slice(0,2)]);
+  const dots=list.map((_,k)=>`<span class="dot ${k<i?"done":k===i?"now":""}"></span>`).join("");
+  const spots=[[18,58],[46,28],[72,62]];
+  go(`<div class="bar">${backBtn()}<div class="dots" role="img" aria-label="Word ${i+1} of ${list.length}">${dots}</div></div>
+    <section class="page">
+      <span class="skill">${esc(u.trickLabel)}</span>
+      <p class="q">Listen. Find the word hiding in the garden.</p>
+      ${canSpeak?`<button class="bigsay" id="sayit" aria-label="Hear the word again">${ICON.speak}</button>`:""}
+      <p class="sentence">${esc(it[1]).replace("___",'<span class="blank"></span>')}</p>
+      <div class="seek">
+        <svg viewBox="0 0 320 140" aria-hidden="true"><rect width="320" height="90" fill="#d7ebe3"/><rect y="90" width="320" height="50" fill="#8fbf9a"/><circle cx="250" cy="36" r="16" fill="#efb12a"/><ellipse cx="70" cy="108" rx="28" ry="10" fill="#2e6a4e"/></svg>
+        ${opts.map((o,k)=>`<button class="hid" style="left:${spots[k][0]}%;top:${spots[k][1]}%" data-k="${k}">${esc(o)}</button>`).join("")}
+      </div>
       <div id="fb"></div>
     </section>`);
   document.getElementById("back").onclick=home;
@@ -851,18 +1054,18 @@ function wordGame(u,kind,i=0,firsts=[]){
   const sb=document.getElementById("sayit");if(sb)sb.onclick=speakIt;
   setTimeout(speakIt,250);
   let tried=false;const fb=document.getElementById("fb");
-  app.querySelectorAll(".opt").forEach(btn=>btn.onclick=()=>{
+  app.querySelectorAll(".hid").forEach(btn=>btn.onclick=()=>{
     const o=opts[+btn.dataset.k];
     if(o===target){
-      btn.classList.add("right");app.querySelectorAll(".opt").forEach(b=>b.disabled=true);
+      btn.classList.add("right");app.querySelectorAll(".hid").forEach(b=>b.disabled=true);chime("whoosh");
       const got=!tried,last=i===list.length-1;
-      fb.innerHTML=`<div class="feedback ok"><b>${got?["You got it!","Yes!","Great spelling!","Super!"][i%4]:"Yes! You found it."}</b><div><button class="btn go" id="next">${last?"See my stars":"Next word"}</button></div></div>`;
+      fb.innerHTML=`<div class="feedback ok"><b>${got?"You got it!":"Yes! You found it."}</b><div><button class="btn go" id="next">${last?"See my stars":"Next word"}</button></div></div>`;
       const n=document.getElementById("next");n.focus();
-      n.onclick=()=>last?finish({id:`u${u.n}-${kind}`,title:`Unit ${u.n}: ${spell?"Spell it":"Trick words"}`,firsts:[...firsts,got],again:()=>wordGame(u,kind),unit:u}):wordGame(u,kind,i+1,[...firsts,got]);
+      n.onclick=()=>last?finish({id:`u${u.n}-trick`,title:`Unit ${u.n}: Trick words`,firsts:[...firsts,got],again:()=>trickSeek(u),unit:u}):trickSeek(u,i+1,[...firsts,got]);
     }else{
       if(!tried){S.words[target]=(S.words[target]||0)+1;save()}
       tried=true;btn.classList.add("wrong","shake");btn.disabled=true;
-      fb.innerHTML=`<div class="feedback hint"><b>Not quite. Try again!</b><span>${spell?"Listen again and tap out each sound on your fingers.":"Listen again. Look at the first letter."}</span></div>`;
+      fb.innerHTML=`<div class="feedback hint"><b>Not quite. Try again!</b><span>Listen again. Look at the first letter.</span></div>`;
       speakIt();
     }
   });
@@ -870,8 +1073,32 @@ function wordGame(u,kind,i=0,firsts=[]){
 
 /* ---- Stories ---- */
 function trickSet(s){if(!s.unit)return new Set();const u=unitOf(s.unit);return new Set(u.trick.map(t=>t[0].toLowerCase()))}
+const SCENES={
+  u1a:{prompt:"Tap the fish!",ok:"fish",bits:["shop","fish","gull"]},
+  u1b:{prompt:"Tap the ship!",ok:"ship",bits:["ship","wind","lake"]},
+  u2a:{prompt:"Tap the skunk!",ok:"skunk",bits:["dog","skunk","hill"]},
+  u2b:{prompt:"Tap the sling!",ok:"sling",bits:["sling","rock","giant"]},
+  u3a:{prompt:"Tap the dog!",ok:"dog",bits:["dog","stick","wind"]},
+  u3b:{prompt:"Tap the kind man!",ok:"man",bits:["man","colt","inn"]},
+  u4a:{prompt:"Tap the cup!",ok:"cup",bits:["kids","grass","cup"]},
+  u4b:{prompt:"Tap the ark!",ok:"ark",bits:["ark","animals","rainbow"]},
+  pip:{prompt:"Tap the red ball!",ok:"ball",bits:["puppy","ball","couch"]},
+  david:{prompt:"Tap the five stones!",ok:"stones",bits:["sling","stones","giant"]},
+  picnic:{prompt:"Tap the blanket!",ok:"blanket",bits:["rain","blanket","apple"]},
+  noah:{prompt:"Tap the dove!",ok:"dove",bits:["ark","dove","rainbow"]},
+  sunflower:{prompt:"Tap the sunflower!",ok:"flower",bits:["seed","sprout","flower"]},
+  lunch:{prompt:"Tap the basket!",ok:"basket",bits:["bread","fish","basket"]},
+  esther:{prompt:"Tap the crown!",ok:"crown",bits:["crown","scepter","palace"]},
+  library:{prompt:"Tap the book!",ok:"book",bits:["book","shark","desk"]},
+  daniel:{prompt:"Tap the lion!",ok:"lion",bits:["lion","window","den"]}
+};
+function sceneSvg(bits){
+  const colors=["#e07a5f","#efb12a","#3d63b8"],xs=[70,160,250];
+  const shapes=bits.map((name,i)=>`<g transform="translate(${xs[i]},64)"><circle r="20" fill="${colors[i]}"/><text y="38" text-anchor="middle" font-size="13" fill="#1d2a23" font-family="Andika,sans-serif">${esc(name)}</text></g>`).join("");
+  return `<svg class="storyscene" viewBox="0 0 320 150" role="img" aria-label="${esc(bits.join(", "))}"><rect width="320" height="96" fill="#d7ebe3"/><rect y="96" width="320" height="54" fill="#8fbf9a"/><circle cx="270" cy="34" r="16" fill="#efb12a"/>${shapes}</svg>`;
+}
 function read(id){
-  const s=byId(id),tricks=trickSet(s);
+  const s=byId(id),tricks=trickSet(s),scene=SCENES[id];
   const meta=s.unit?`Unit ${s.unit} story`:`Story Shelf · Level ${s.level} · ${LEVELS[s.level-1].name}`;
   const paras=s.text.map(p=>`<p>${p.split(/(\s+)/).map(t=>{if(!/\S/.test(t))return t;const bare=t.toLowerCase().replace(/[^a-z']/g,"");return `<span class="w ${tricks.has(bare)?"trick":""}">${esc(t)}</span>`}).join("")}</p>`).join("");
   go(`<div class="bar">${backBtn()}
@@ -879,22 +1106,78 @@ function read(id){
     <article class="page">
       <div class="meta"><span class="kind ${s.kind==="Everyday"?"every":""}">${s.kind}</span><span class="tip">${meta}</span></div>
       <h2>${esc(s.title)}</h2>
+      ${scene?sceneSvg(scene.bits):""}
       <div class="story">${paras}</div>
       <p class="tip">${tricks.size?"Wavy lines mark this unit's trick words. ":""}${canSpeak?"Stuck on a word? Tap it to hear it.":""}</p>
+      <div class="row">
+        ${canSpeak?`<button class="btn" id="line">Read one line</button>`:""}
+        <button class="btn" id="rec">Hear me read</button>
+      </div>
+      <div id="recbox"></div>
     </article>
     <div class="center"><button class="btn go" id="ready">I'm done reading!</button></div>`);
   document.getElementById("back").onclick=home;
-  document.getElementById("ready").onclick=()=>quiz(id);
+  document.getElementById("ready").onclick=()=>storyMoment(id);
   const talk=document.getElementById("talk");
   if(talk){let on=false;talk.onclick=()=>{
     if(on){stopTalk();on=false;talk.innerHTML=`${ICON.speak} Read it to me`;return}
     on=true;talk.innerHTML=`${ICON.stop} Stop reading`;
     say(s.title+". "+s.text.join(" "),0.85,()=>{on=false;talk.innerHTML=`${ICON.speak} Read it to me`});
   }}
+  const line=document.getElementById("line");
+  if(line){let li=0;line.onclick=()=>{
+    stopTalk();
+    const ps=[...app.querySelectorAll(".story p")];
+    ps.forEach(p=>p.classList.remove("on"));
+    if(!ps.length)return;
+    if(li>=ps.length)li=0;
+    ps[li].classList.add("on");ps[li].scrollIntoView({block:"nearest"});
+    say(ps[li].textContent,0.85);li++;
+  }}
+  let recorder=null;
+  document.getElementById("rec").onclick=async()=>{
+    const box=document.getElementById("recbox"),btn=document.getElementById("rec");
+    if(recorder&&recorder.state==="recording"){recorder.stop();return}
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||typeof MediaRecorder!=="function"){box.innerHTML=`<p class="tip">This iPad cannot use the microphone here. You can still read the story.</p>`;return}
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      const chunks=[];
+      recorder=new MediaRecorder(stream);
+      recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+      recorder.onstop=()=>{
+        stream.getTracks().forEach(t=>t.stop());
+        const url=URL.createObjectURL(new Blob(chunks,{type:recorder.mimeType||"audio/webm"}));
+        box.innerHTML=`<audio controls src="${url}"></audio><p class="tip">This stays on this iPad. It is not saved with your lessons.</p>`;
+        btn.textContent="Hear me read";
+      };
+      recorder.start();btn.textContent="Stop and play it back";
+    }catch(e){box.innerHTML=`<p class="tip">The microphone stayed off, and that is all right. You can still read the story.</p>`}
+  };
   app.querySelectorAll(".w").forEach(w=>w.onclick=()=>{
     app.querySelectorAll(".w.said").forEach(x=>x.classList.remove("said"));
     w.classList.add("said");say(w.textContent.replace(/[^\w']/g,""),0.7);
     setTimeout(()=>w.classList.remove("said"),1200);
+  });
+}
+function storyMoment(id){
+  const scene=SCENES[id];
+  if(!scene)return quiz(id);
+  go(`<div class="bar">${backBtn("Back to story")}</div>
+    <section class="page">
+      <h2>${esc(scene.prompt)}</h2>
+      ${sceneSvg(scene.bits)}
+      <div class="opts">${scene.bits.map((b,k)=>`<button class="opt" data-k="${k}">${esc(b)}</button>`).join("")}</div>
+      <div id="fb"></div>
+    </section>`);
+  document.getElementById("back").onclick=()=>read(id);
+  app.querySelectorAll(".opt").forEach(btn=>btn.onclick=()=>{
+    const b=scene.bits[+btn.dataset.k];
+    if(b===scene.ok){
+      chime("whoosh");btn.classList.add("right");
+      app.querySelectorAll(".opt").forEach(x=>x.disabled=true);
+      document.getElementById("fb").innerHTML=`<div class="feedback ok"><b>You found it!</b><div><button class="btn go" id="next">Story questions</button></div></div>`;
+      document.getElementById("next").onclick=()=>quiz(id);
+    }else{btn.classList.add("wrong","shake");setTimeout(()=>btn.classList.remove("wrong","shake"),400)}
   });
 }
 
@@ -955,6 +1238,7 @@ function finish({id,title,firsts,again,unit,skills}){
   const newUnits=UNITS.filter((u,k)=>!unitsBefore[k]&&unitOpen(u.n));
   const newShelf=LEVELS.filter((L,k)=>!shelfBefore[k]&&shelfOpen(L.n));
   const msg=stars===3?"Every one right on the first try!":stars===2?"Great work! You were so close.":"You finished! Practice makes it stronger.";
+  const warm=gained>0?"Your tree is getting stronger!":"Nice reading!";
   const gainLine=gained>0?`<div class="gain">${BLOSSOM_ICON}<span>+${gained} new blossom${gained>1?"s":""} on your tree!</span></div>`
     :`<div class="gain">${BLOSSOM_ICON}<span>Your best here is ${prev.stars} star${prev.stars>1?"s":""}, so no new blossoms this time.</span></div>`;
   const nextGoal=newBest<3?`<p class="tip">To grow your 3rd blossom here, try again and get all ${total} right on the first try.</p>`:"";
@@ -962,9 +1246,14 @@ function finish({id,title,firsts,again,unit,skills}){
       ${starsRow(3)}<span class="${stars===3?"me":""}">All ${total} right on the first try</span>
       ${starsRow(2)}<span class="${stars===2?"me":""}">${Math.ceil(total*2/3)} or more right on the first try</span>
       ${starsRow(1)}<span class="${stars===1?"me":""}">You finished!</span></div>`;
+  const petals=[...Array(10)].map((_,i)=>`<i style="--x:${(i-5)*18}px;background:${i%2?"var(--leaf)":"var(--blossom)"};animation-delay:${i*0.05}s"></i>`).join("");
   go(`<section class="page result">
-      <h2>${esc(title)}</h2>
+      <div class="confetti" aria-hidden="true">${petals}</div>
+      <h2>You did it!</h2>
+      <div class="buddy">${BUDDY}<span>${esc(warm)}</span></div>
+      <div class="flywrap">${gained>0?`<span class="flystar">${starSvg(true)}</span>`:""}<div class="minitree">${treeSvg(totalStars(),gained)}</div></div>
       <div class="bigstars">${[0,1,2].map(k=>starSvg(k<stars,k<stars?"pop":"",`animation-delay:${k*.25}s`)).join("")}</div>
+      <p class="q">${esc(title)}</p>
       <p class="q">${msg}</p>
       <p class="tip">${right} of ${total} right on the first try = ${stars} star${stars>1?"s":""}</p>
       ${gainLine}${nextGoal}${key}
@@ -975,7 +1264,8 @@ function finish({id,title,firsts,again,unit,skills}){
     </section>`);
   document.getElementById("again").onclick=again;
   document.getElementById("tree").onclick=home;
-  if(canSpeak)say(msg,0.9);
+  chime("bloom");
+  if(canSpeak)say("You did it! "+(gained>0?warm+" ":"")+msg,0.9);
 }
 
 /* ---- Badges: shown on her home screen, announced on the result screen ---- */
@@ -1172,6 +1462,12 @@ function admin(noPull,keepScroll){
     <details class="grown"><summary>All activities and settings</summary><div class="gbody">
       <div class="tablewrap"><table><thead><tr><th>Where</th><th>Activity</th><th>Best</th><th>Stars</th><th>Tries</th><th>Last</th></tr></thead><tbody>${rows}</tbody></table></div>
       <p class="small">Stars: all right on the first try = 3, two-thirds or more = 2, finishing = 1. Only the best result counts, and every star is one blossom, so a retry can only add blossoms. The Sound Units follow the Fundations Level 2 order, so practice matches class.</p>
+      <label for="childname">Her name on the tree</label>
+      <div class="row" style="justify-content:flex-start">
+        <input class="pin code" id="childname" maxlength="24" value="${esc(childName())}" autocomplete="off" aria-label="Her name">
+        <button class="btn" id="savename">Save name</button>
+      </div>
+      <p class="tip">The home screen says this name. It stays if you start over.</p>
       <div class="row" style="justify-content:flex-start">
         <button class="btn" id="unlockAll">${S.unlockAll?"Use normal unlocking":"Open all units and levels"}</button>
         <button class="btn" id="changePin">Change PIN</button>
@@ -1181,6 +1477,7 @@ function admin(noPull,keepScroll){
   if(keepDetails){const d=app.querySelector("details.grown");if(d)d.open=true}
   if(canSync&&code)adminPoll=setInterval(async()=>{
     if(view!=="admin"||pushing||document.hidden)return;
+    if(document.activeElement&&document.activeElement.id==="childname")return;
     const box=document.getElementById("confirm");
     if(box&&box.innerHTML)return;
     const r=await pull();
@@ -1189,6 +1486,11 @@ function admin(noPull,keepScroll){
   document.getElementById("back").onclick=home;
   app.querySelectorAll(".chipword").forEach(b=>b.onclick=()=>say(b.dataset.w,0.7));
   document.getElementById("unlockAll").onclick=()=>{S.unlockAll=!S.unlockAll;S.settingsAt=Date.now();save();admin(true)};
+  document.getElementById("savename").onclick=()=>{
+    const v=(document.getElementById("childname").value||"").replace(/[<>&]/g,"").trim().slice(0,24)||"Hadassah";
+    if(v!==childName()||!S.childName){S.childName=v;S.nameAt=Date.now();save()}
+    admin(true,true);
+  };
   document.getElementById("changePin").onclick=()=>gate(true);
   document.getElementById("changeCode").onclick=codeScreen;
   const sn=document.getElementById("syncNow");if(sn)sn.onclick=()=>{sync.status="busy";admin(true);push()};
@@ -1196,7 +1498,11 @@ function admin(noPull,keepScroll){
     const c=document.getElementById("confirm");
     c.innerHTML=`<div class="feedback hint"><b>Clear all stars, badges, blossoms and the lesson log${code&&canSync?" on every connected device":""}?</b><div class="row" style="justify-content:flex-start"><button class="btn danger" id="yes">Yes, start over</button><button class="btn" id="no">Keep progress</button></div></div>`;
     document.getElementById("no").onclick=()=>c.innerHTML="";
-    document.getElementById("yes").onclick=()=>{S={best:{},done:{},unlockAll:false,history:[],days:[],skills:{},words:{},resetAt:Date.now(),settingsAt:0};save();lastStars=0;admin(true)};
+    document.getElementById("yes").onclick=()=>{
+      const keep={childName:S.childName,nameAt:S.nameAt,decor:S.decor,decorAt:S.decorAt};
+      S={best:{},done:{},unlockAll:false,history:[],days:[],skills:{},words:{},resetAt:Date.now(),settingsAt:0,watered:"",seen:{miles:[],facts:[]},...keep};
+      save();lastStars=0;admin(true);
+    };
   };
 }
 
