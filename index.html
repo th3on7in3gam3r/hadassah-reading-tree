@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Reading Tree">
+<meta name="theme-color" content="#2e6a4e">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Hadassah's Reading Tree</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Grandstander:wght@600;800&display=swap">
+<style>
+/* Layout: one calm reading column; a myrtle tree that blossoms with every star sits on top, phonics units below, story shelf last. */
+:root{
+  --bg:#eef4ee; --paper:#fffefb; --ink:#1d2a23; --muted:#56675d; --line:#d3e0d6; --soft:#e3ebe4;
+  --myrtle:#2e6a4e; --leaf:#5f9e78; --leaf2:#86b998; --bark:#7b5a43;
+  --blossom:#e0648c; --blossom-ink:#a8325c; --blossom-soft:#fbe2ea; --sun:#efb12a; --sun-soft:#fdf0cc;
+  --good:#2f8a55; --good-soft:#ddf2e4; --try:#c0603a; --try-soft:#fbe7dd; --suffix:#3d63b8; --suffix-soft:#e2e9fa;
+  --display:"Grandstander","Comic Sans MS","Trebuchet MS",system-ui,sans-serif;
+  --body:"Andika","Verdana","Trebuchet MS",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111c17; --paper:#1a2821; --ink:#ecf3ee; --muted:#a3b5aa; --line:#2c3f35; --soft:#22322a;
+  --myrtle:#86cfa6; --leaf:#3f7a58; --leaf2:#2f6247; --bark:#a47c5e;
+  --blossom:#f08cad; --blossom-ink:#f5a8c2; --blossom-soft:#3a2430; --sun:#f4c552; --sun-soft:#3a3220;
+  --good:#6fd39a; --good-soft:#1d3a2a; --try:#f09a72; --try-soft:#3d2a20; --suffix:#9db7f2; --suffix-soft:#243250; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111c17; --paper:#1a2821; --ink:#ecf3ee; --muted:#a3b5aa; --line:#2c3f35; --soft:#22322a;
+  --myrtle:#86cfa6; --leaf:#3f7a58; --leaf2:#2f6247; --bark:#a47c5e;
+  --blossom:#f08cad; --blossom-ink:#f5a8c2; --blossom-soft:#3a2430; --sun:#f4c552; --sun-soft:#3a3220;
+  --good:#6fd39a; --good-soft:#1d3a2a; --try:#f09a72; --try-soft:#3d2a20; --suffix:#9db7f2; --suffix-soft:#243250; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5}
+.wrap{max-width:740px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(28px,6vw,40px);font-weight:800;color:var(--myrtle)}
+h2{font-size:24px;font-weight:800}
+h3{font-size:19px;font-weight:600}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,summary:focus-visible{outline:3px solid var(--blossom);outline-offset:3px}
+
+.hero{display:flex;flex-direction:column;gap:6px}
+.hero p{color:var(--muted);max-width:52ch}
+.treecard{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:14px 14px 12px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.treecard svg{width:100%;max-width:420px;height:auto;display:block}
+.tally{font-family:var(--display);font-weight:600;font-size:18px;display:flex;gap:8px;align-items:baseline}
+.tally .n{color:var(--blossom-ink);font-size:26px;font-variant-numeric:tabular-nums}
+.rule{display:flex;align-items:center;gap:6px;font-size:15px;color:var(--muted)}
+.rule .star{width:18px;height:18px}
+
+.sectionhead{display:flex;flex-direction:column;gap:2px}
+.sectionhead p{color:var(--muted);font-size:15px}
+.eyebrow{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+
+/* Units */
+.unit{background:var(--paper);border:2px solid var(--line);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.unit.here{border-color:var(--leaf)}
+.unit.locked{background:var(--soft);border-style:dashed}
+.unithead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.unithead .t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.unithead .sub{color:var(--muted);font-size:15px}
+.chip{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:999px;background:var(--good-soft);color:var(--myrtle);white-space:nowrap}
+.chip.count{background:var(--sun-soft);color:var(--ink);text-transform:none;letter-spacing:0;font-size:14px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.step{background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:10px 12px;text-align:left;display:flex;flex-direction:column;gap:4px;min-height:72px;min-width:0}
+.step:hover{border-color:var(--leaf)}
+.step .k{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.step .nm{font-family:var(--display);font-weight:600;font-size:17px;line-height:1.2}
+.step .done{font-size:14px;font-weight:700;color:var(--good)}
+.step .todo{font-size:14px;color:var(--muted)}
+.lockmsg{font-size:15px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.lockmsg svg{flex:none}
+.later{font-size:15px;color:var(--muted);text-align:center}
+
+/* Shelf */
+.shelf{display:flex;flex-direction:column;gap:14px}
+.levelhead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.levelhead .note{color:var(--muted);font-size:15px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.card{background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card:hover:not(:disabled){border-color:var(--leaf)}
+.card:disabled{cursor:default;opacity:.55}
+.kind{align-self:flex-start;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 9px;border-radius:999px;background:var(--blossom-soft);color:var(--blossom-ink)}
+.kind.every{background:var(--good-soft);color:var(--myrtle)}
+.card h3{font-size:17px}
+.stars{display:inline-flex;gap:3px}
+.star{width:20px;height:20px;flex:none}
+.star path{fill:var(--line)}
+.star.on path{fill:var(--sun)}
+
+/* Shared screens */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.btn{border:2px solid var(--line);background:var(--paper);border-radius:999px;padding:9px 16px;min-height:44px;font-weight:700;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{border-color:var(--leaf)}
+.btn.go{background:var(--myrtle);border-color:var(--myrtle);color:var(--paper);font-family:var(--display);font-size:19px;padding:12px 24px}
+.btn.go:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn svg{width:18px;height:18px;flex:none}
+.page{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:24px clamp(18px,5vw,36px);display:flex;flex-direction:column;gap:16px}
+.meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tip{font-size:14px;color:var(--muted)}
+.center{display:flex;justify-content:center}
+.lead{font-size:18px;color:var(--muted)}
+
+/* Story */
+.story{font-size:clamp(20px,4.6vw,23px);line-height:1.75;display:flex;flex-direction:column;gap:14px;max-width:34em}
+.w{border-radius:6px;padding:0 1px;cursor:pointer}
+.w:hover{background:var(--blossom-soft)}
+.w.said{background:var(--sun);color:#1d2a23}
+.w.trick{text-decoration:underline wavy var(--blossom);text-underline-offset:5px;text-decoration-thickness:2px}
+
+/* Sound cards */
+.soundgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.sound{background:var(--bg);border:2px solid var(--line);border-radius:18px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.sound:hover{border-color:var(--leaf)}
+.sound.heard{border-color:var(--good);background:var(--good-soft)}
+.sound .pat{font-family:var(--display);font-weight:800;font-size:40px;line-height:1.1;color:var(--myrtle)}
+.sound .kw{font-size:19px}
+.sound .kw b{color:var(--blossom-ink)}
+.note{background:var(--sun-soft);border-radius:14px;padding:12px 14px;font-size:17px}
+
+/* Tap & read */
+.taprow{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.tapbox{min-width:72px;min-height:84px;padding:8px 14px;border-radius:16px;border:3px solid var(--line);background:var(--bg);font-family:var(--display);font-weight:800;font-size:44px;line-height:1;display:flex;align-items:center;justify-content:center}
+.tapbox.suffix{border-color:var(--suffix);background:var(--suffix-soft);color:var(--suffix)}
+.tapbox.lit{background:var(--sun);border-color:var(--sun);color:#1d2a23}
+.dotrow{display:flex;justify-content:center;gap:10px}
+.tapdot{width:14px;height:14px;border-radius:50%;background:var(--line)}
+.tapdot.lit{background:var(--sun)}
+.whole{font-family:var(--display);font-weight:800;font-size:clamp(44px,12vw,64px);text-align:center;letter-spacing:.02em;min-height:1.3em;color:var(--myrtle)}
+.whole.dim{color:var(--line)}
+
+/* Quiz & games */
+.dots{display:flex;gap:8px;flex-wrap:wrap}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--line)}
+.dot.now{background:var(--blossom)}
+.dot.done{background:var(--leaf)}
+.skill{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--myrtle)}
+.q{font-size:clamp(21px,4.8vw,25px);font-family:var(--display);font-weight:600;line-height:1.3}
+.sentence{font-size:22px;line-height:1.5}
+.blank{display:inline-block;min-width:3.4em;border-bottom:3px solid var(--ink);margin:0 4px}
+.bigsay{align-self:center;width:96px;height:96px;border-radius:50%;border:3px solid var(--leaf);background:var(--good-soft);color:var(--myrtle);display:flex;align-items:center;justify-content:center}
+.bigsay svg{width:44px;height:44px}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opts.words{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.opt{background:var(--bg);border:2px solid var(--line);border-radius:16px;padding:14px 18px;min-height:56px;text-align:left;font-size:20px;display:flex;gap:12px;align-items:center}
+.opts.words .opt{justify-content:center;font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:.02em}
+.opts.vowels{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.opts.vowels .opt{justify-content:center;padding:12px 4px;font-family:var(--display);font-weight:800;font-size:36px;min-height:72px}
+.vblank{display:inline-block;min-width:.75em;border-bottom:6px solid var(--blossom);margin:0 .06em;color:var(--blossom-ink)}
+.opt .ab{font-family:var(--display);font-weight:800;color:var(--muted);flex:none;width:1.4em}
+.opt:hover:not(:disabled){border-color:var(--leaf)}
+.opt.right{background:var(--good-soft);border-color:var(--good)}
+.opt.wrong{background:var(--try-soft);border-color:var(--try);opacity:.8}
+.opt:disabled{cursor:default}
+.feedback{border-radius:16px;padding:14px 16px;font-size:18px;display:flex;flex-direction:column;gap:8px}
+.feedback.ok{background:var(--good-soft)}
+.feedback.hint{background:var(--try-soft)}
+.feedback b{font-family:var(--display)}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.peek{font-size:17px;line-height:1.65;border-left:4px solid var(--line);padding-left:14px;color:var(--muted);display:flex;flex-direction:column;gap:8px;max-height:260px;overflow:auto}
+
+/* Result */
+.result{align-items:center;text-align:center}
+.bigstars{display:flex;gap:10px}
+.bigstars .star{width:56px;height:56px}
+.pop{animation:pop .5s both}
+@keyframes pop{0%{transform:scale(.2);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+.gain{display:flex;align-items:center;gap:10px;background:var(--blossom-soft);border-radius:16px;padding:12px 16px;font-family:var(--display);font-weight:600;font-size:19px;text-align:left}
+.gain svg{width:34px;height:34px;flex:none}
+.keyrow{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;text-align:left;font-size:16px;background:var(--bg);border-radius:14px;padding:12px 14px}
+.keyrow .stars .star{width:18px;height:18px}
+.keyrow .me{font-weight:700}
+.unlock{background:var(--good-soft);border-radius:16px;padding:12px 16px;font-family:var(--display);font-weight:600}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+
+/* Grown-ups */
+details.grown{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:12px 16px}
+details.grown summary{font-weight:700;cursor:pointer;color:var(--muted);min-height:32px}
+.gbody{display:flex;flex-direction:column;gap:12px;margin-top:12px;font-size:15px}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.small{font-size:14px;color:var(--muted)}
+.btn.danger{border-color:var(--try);color:var(--try)}
+
+/* Garden Journal */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.stat svg{width:24px;height:24px;color:var(--blossom)}
+.stat .big{font-family:var(--display);font-weight:800;font-size:30px;line-height:1.1;color:var(--myrtle);font-variant-numeric:tabular-nums}
+.stat>span:last-child{font-size:14px;color:var(--muted)}
+.badgegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px}
+.badge{background:var(--bg);border:2px solid var(--line);border-radius:16px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;min-width:0}
+.badge .med{width:50px;height:50px;border-radius:50%;background:var(--sun-soft);color:var(--sun);display:flex;align-items:center;justify-content:center;flex:none}
+.badge .med svg{width:26px;height:26px}
+.badge b{font-family:var(--display);font-weight:600;font-size:13px;line-height:1.15}
+.badge small{font-size:11px;color:var(--muted);line-height:1.25}
+.badge.on{border-color:var(--sun)}
+.badge.off{opacity:.55}
+.badge.off .med{background:var(--soft);color:var(--muted)}
+.barrow{display:grid;grid-template-columns:1fr auto;gap:3px 10px;align-items:baseline;font-size:15px}
+.barrow .pct{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.track{grid-column:1/-1;height:10px;border-radius:999px;background:var(--soft);overflow:hidden}
+.fill{height:100%;border-radius:999px;background:var(--leaf)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chipword{border:2px solid var(--line);background:var(--bg);border-radius:999px;padding:6px 12px;font-weight:700;font-size:16px;display:inline-flex;gap:6px;align-items:baseline}
+.chipword i{font-style:normal;font-size:12px;color:var(--try)}
+.chipword:hover{border-color:var(--leaf)}
+.dayrow{display:flex;gap:6px;flex-wrap:wrap}
+.day{width:34px;height:34px;border-radius:12px;background:var(--soft);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:12px}
+.day.on{background:var(--good-soft)}
+
+/* Grown-up gate & lesson log */
+.pin{font:inherit;font-size:32px;letter-spacing:.5em;text-align:center;width:9em;max-width:100%;padding:10px 0 10px .5em;border:2px solid var(--line);border-radius:16px;background:var(--bg);color:var(--ink)}
+.pin:focus{outline:3px solid var(--blossom);outline-offset:2px;border-color:var(--leaf)}
+.pin.code{letter-spacing:0;font-size:22px;width:18em;padding:10px 14px;font-family:var(--body)}
+.today{border-width:2px}
+.today.yes{border-color:var(--good);background:var(--good-soft)}
+.today.no{border-color:var(--try);background:var(--try-soft)}
+.today ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+.linkbtn{background:none;border:0;color:var(--muted);font-size:14px;display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;min-height:44px}
+.linkbtn:hover{color:var(--ink);background:var(--soft)}
+.linkbtn svg{width:16px;height:16px}
+.rule svg{width:18px;height:18px;flex:none}
+
+.blossom{transform-box:fill-box;transform-origin:center}
+.blossom.new{animation:pop .7s both}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script>
+/* =================== PHONICS UNITS =================== */
+const UNITS=[
+{n:1,title:"Digraphs",sub:"sh, th, ch, wh, ck",
+ note:"A digraph is two letters that make one sound. Tap it once!",
+ cards:[["sh","ship"],["th","thumb"],["ch","chin"],["wh","whip"],["ck","sock"],["shr","shrub"],["thr","three"]],
+ tap:[["sh","i","p"],["ch","o","p"],["th","i","n"],["wh","e","n"],["d","u","ck"],["sh","r","e","d"],["th","r","a","sh"],["ch","e","s","t"]],
+ spell:[["duck","duk","duc","The ___ can swim in the pond."],["chop","shop","cop","Dad will ___ the log."],["with","wish","wiv","Come ___ me."],["when","wen","whne","___ can we go?"],["shrub","srub","shub","The cat is in the ___."],["kick","kik","cick","I can ___ the ball."]],
+ trick:[["was","It ___ fun."],["said","Mom ___, “Hi!”"],["they","___ ran fast."],["of","a cup ___ milk"],["what","___ is that?"],["there","The cat is over ___."]],
+ trickLabel:"Review trick words",
+ stories:[
+ {id:"u1a",kind:"Everyday",title:"The Shop on the Dock",text:[
+ "Chad and his mom went to the fish shop on the dock. The shop had crabs and clams in a big tank.",
+ "“Can I get a crab?” said Chad. “Not this trip,” said Mom. “We will get fish for lunch.”",
+ "Chad got the fish in a bag. Then a big gull sat on the dock. It went flap, flap, flap at the bag!",
+ "Chad held the bag up. “This fish is not for you!” he said.",
+ "The gull went back to its ship. Chad and Mom had fish for lunch. It was the best lunch!"],
+ qs:[{s:"remember",q:"What did the shop have in a big tank?",o:["Crabs and clams","Ducks and hens","Frogs and bugs"],h:"Look at the first part of the story."},
+ {s:"order",q:"What happened right after Chad got the fish?",o:["A big gull sat on the dock","Mom said no crab","They went to the shop"],h:"Find “Chad got the fish in a bag.” What comes next?"},
+ {s:"word",q:"Which word from the story has the ch sound?",o:["lunch","dock","tank"],h:"Say each word slowly. Which one ends with ch, like chin?"},
+ {s:"think",q:"Why did Chad hold the bag up?",o:["To keep the fish from the gull","To show Mom","To get a crab"],h:"What was the gull doing at the bag?"}]},
+ {id:"u1b",kind:"Bible",title:"Jesus Hushes the Wind",text:[
+ "Jesus got in a ship with His men. They went across the lake. Jesus had a nap on a mat.",
+ "Then the wind got bad. Splash! Smash! The ship went up and then down. The men were in a panic.",
+ "“Jesus, help us!” they said.",
+ "Jesus got up. He said to the wind, “Hush. Be still!”",
+ "The wind did stop. The lake was flat.",
+ "The men said, “Who is this? The wind and the lake do what He says!”"],
+ qs:[{s:"remember",q:"Where did Jesus have a nap?",o:["On a mat in the ship","On the dock","In a tent"],h:"Look at the first part."},
+ {s:"order",q:"What did Jesus do right after He got up?",o:["He told the wind to hush","He had a nap","He got in the ship"],h:"Find “Jesus got up.” Read what He said."},
+ {s:"word",q:"Which word has the sh sound?",o:["hush","hut","much"],h:"Say each word. Which one ends like ship starts?"},
+ {s:"think",q:"Why did the men say, “Who is this?”",o:["The wind and lake did what Jesus said","They did not know His name","They were lost"],h:"Read the last part. What did the wind and lake do?"}]}]},
+
+{n:2,title:"Blends, Bonus Letters & Glued Sounds",sub:"st, fr, ff, ll, ss, zz, all, ang, ing, ank, unk",
+ note:"Bonus letters: after a short vowel at the end of a word, f, l, s and z come in pairs (puff, bell, kiss, buzz). Glued sounds stick together, so tap them as one!",
+ cards:[["ff","puff"],["ll","bell"],["ss","kiss"],["zz","buzz"],["all","ball"],["am","ham"],["an","fan"],["ang","fang"],["ing","king"],["ong","song"],["ung","lung"],["ank","bank"],["ink","pink"],["onk","honk"],["unk","junk"]],
+ tap:[["s","t","o","p"],["f","r","o","g"],["b","e","ll"],["s","t","u","ff"],["k","ing"],["b","ank"],["s","k","unk"],["b","all"],["s","w","ing"]],
+ spell:[["bell","bel","bele","Ring the ___!"],["stuff","stuf","stuph","Put the ___ in the box."],["sing","sinng","sig","We ___ to God."],["bank","bangk","bak","Put the cash in the ___."],["skunk","scunk","skuk","The ___ has a bad smell."],["fall","fal","fawl","Do not ___ off the step."]],
+ trick:[["shall","___ we go?"],["pull","___ the wagon."],["full","The cup is ___."],["both","___ kids sat."],["talk","Let's ___ on the phone."],["walk","We ___ to the shop."]],
+ trickLabel:"Unit 2 trick words",
+ vowels:{note:"The vowels are a, e, i, o and u. When one vowel is closed in by a consonant (cat, bed, sun), it says its short sound.",
+  cards:[["a","apple"],["e","Ed"],["i","itch"],["o","octopus"],["u","up"]],
+  words:[["bat","a"],["bed","e"],["pig","i"],["hot","o"],["sun","u"],["fan","a"],["ten","e"],["fox","o"],["lip","i"],["mud","u"]]},
+ stories:[
+ {id:"u2a",kind:"Everyday",title:"Bell and the Skunk",text:[
+ "Bell is a big dog. She has a long tail and soft fluff. Bell can sniff and dig all day.",
+ "One day, Bell ran up the hill. She got a whiff of a bad smell. It was a skunk!",
+ "The skunk had black fluff and a big tail. It went stamp, stamp, stamp.",
+ "“Bell, stop!” said Fran. But Bell did not stop. Bell went sniff, sniff.",
+ "The skunk went PFFT! What a stink!",
+ "Fran had to scrub Bell in the tub. Scrub, scrub, scrub! Bell did not smell well for a long spell.",
+ "“Next trip up the hill,” said Fran, “you must not sniff a skunk!”"],
+ qs:[{s:"remember",q:"What animal did Bell find?",o:["A skunk","A cat","A frog"],h:"Read the end of the second part."},
+ {s:"order",q:"What did Fran do after the skunk went PFFT?",o:["Scrubbed Bell in the tub","Ran up the hill","Gave Bell a snack"],h:"Find “What a stink!” What comes next?"},
+ {s:"word",q:"Which word has the glued sound unk?",o:["skunk","skip","sun"],h:"Say each word slowly. Which one ends like junk?"},
+ {s:"think",q:"What did Bell learn?",o:["Do not sniff a skunk!","Dig all day","Never take a bath"],h:"Read what Fran said at the very end."}]},
+ {id:"u2b",kind:"Bible",title:"David and His Sling",text:[
+ "Goliath was a big, big man. He was as tall as a wall! He did yell at the king's men, “Send a man to me!”",
+ "The king's men did not budge. Not one man went.",
+ "David was a kid who had sheep. He was not big, but he did trust God.",
+ "“I will go,” said David. He got his sling. He got rocks from a pond.",
+ "David did walk up to Goliath. He spun his sling. Swish, swish, swish!",
+ "The rock hit Goliath, and Goliath fell flat. Thud!",
+ "All the king's men sang and clapped. God was with David!"],
+ qs:[{s:"remember",q:"How tall was Goliath?",o:["As tall as a wall","As tall as a cat","As tall as a cup"],h:"Look at the very first part."},
+ {s:"order",q:"What happened right after the rock hit Goliath?",o:["Goliath fell flat","David got rocks from a pond","David spun his sling"],h:"Find “The rock hit Goliath.”"},
+ {s:"word",q:"Which word has the bonus letters ll?",o:["yell","yes","sled"],h:"Look for two l's side by side."},
+ {s:"think",q:"Why was David not afraid?",o:["He trusted God","He was bigger","He had a sword"],h:"Read the part about David and his sheep."}]}]},
+
+{n:3,title:"Long Vowel Exceptions",sub:"ild, ind, old, olt, ost",
+ note:"These are rule breakers! In ild, ind, old, olt and ost, the vowel says its name: wild, kind, cold, bolt, most.",
+ cards:[["ild","wild"],["ind","kind"],["old","cold"],["olt","bolt"],["ost","most"]],
+ tap:[["k","ind"],["w","ild"],["c","old"],["m","ost"],["b","olt"],["f","ind"],["g","old"],["ch","ild"]],
+ spell:[["kind","kined","cind","Be ___ to a pal."],["cold","coled","kold","The ice is ___."],["wild","wiled","wyld","A ___ fox ran past."],["most","mosst","moast","I got the ___ fish."],["bolt","boult","bollt","Lock the ___ on the shed."],["find","fiend","fined","Can you ___ the cat?"]],
+ trick:[["done","I am ___ with my lunch."],["goes","The bus ___ fast."],["pretty","What a ___ hat!"],["who","___ is at the door?"],["one","I have ___ dog."],["could","___ you help me?"]],
+ trickLabel:"Unit 3 trick words + review",
+ stories:[
+ {id:"u3a",kind:"Everyday",title:"Gus in the Wild Wind",text:[
+ "It was a cold, cold day. The wind was wild.",
+ "Ming has an old dog, Gus. Gus did not mind the cold. He ran and ran, past the post and up the hill.",
+ "“Gus! Come back!” said Ming. But Gus did not come back.",
+ "Ming had to find him. She went past the post. She went up the hill. Then she got a glimpse of a black tail by a big log.",
+ "It was Gus! He had a big stick.",
+ "“You silly dog,” said Ming. She held Gus and did not let go.",
+ "Back in the den, Ming and Gus got snug on the rug. Ming had a cup of hot milk. Gus had a bit of ham.",
+ "“Gus is the most kind, most fun old dog,” said Ming."],
+ qs:[{s:"remember",q:"What did Gus have by the log?",o:["A big stick","A ball","A hat"],h:"Find the part where Ming finds Gus."},
+ {s:"order",q:"What happened right after Ming found Gus?",o:["She held him and did not let go","Gus ran past the post","The wind got wild"],h:"Find “You silly dog.”"},
+ {s:"word",q:"Which word has old?",o:["cold","cod","clot"],h:"Look for o, l, d together."},
+ {s:"think",q:"Why did Ming go up the hill?",o:["To find Gus","To get milk","To fly a kite"],h:"Gus did not come back. What did Ming have to do?"}]},
+ {id:"u3b",kind:"Bible",title:"The Kind Man",text:[
+ "Jesus told this story.",
+ "A man went on a long trip. Bad men hit him and got his cash. They left him in the sand. He was not well.",
+ "A man from the temple went past. He did not stop. Then a temple helper went past. He did not stop.",
+ "Then a man from Samaria got to the spot. His land and the hurt man's land did not get along. But this man was kind. He did stop!",
+ "He put a wrap on the man's cuts. He got the man up on his colt and went to an inn.",
+ "He left cash with the inn man. “Help this man get well,” he said.",
+ "Jesus said, “Be kind, just as this man was kind.”"],
+ qs:[{s:"remember",q:"What did the bad men take?",o:["His cash","His colt","His hat"],h:"Look at the second part."},
+ {s:"order",q:"What did the kind man do first?",o:["Put a wrap on the man's cuts","Went to an inn","Left cash with the inn man"],h:"Find “He did stop!” What came next?"},
+ {s:"word",q:"Which word has ind?",o:["kind","kid","kit"],h:"Look for i, n, d together."},
+ {s:"think",q:"What does Jesus want us to do?",o:["Be kind, even to people not like us","Only help our friends","Stay away from inns"],h:"The kind man helped someone from a different land."}]}]},
+
+{n:4,title:"Suffixes",sub:"-s, -es, -ed, -ing, -er, -est",
+ note:"A suffix is an ending you add to a word. Tap the base word, then tap the suffix. The -ed suffix can say /t/ (jumped), /d/ (filled) or /ed/ (landed).",
+ cards:[["-s","cats"],["-es","wishes"],["-ed","jumped"],["-ing","jumping"],["-er","faster"],["-est","fastest"]],
+ tap:[["jump","-ed",{n:"-ed says /t/"}],["fill","-ed",{n:"-ed says /d/"}],["land","-ed",{n:"-ed says /ed/"}],["wish","-es"],["box","-es"],["rest","-ing"],["fast","-er"],["tall","-est"]],
+ spell:[["jumped","jumpt","jumpd","The frog ___ in the pond."],["wishes","wishs","wishez","Make three ___."],["landed","landid","landded","The jet ___."],["faster","fastur","fastr","I can run ___!"],["tallest","tallist","talest","Dad is the ___."],["boxes","boxs","boxez","Stack the ___."]],
+ trick:[["again","Do it ___!"],["please","___ pass the milk."],["animal","A dog is an ___."],["sure","Are you ___?"],["use","Can I ___ your pen?"],["used","I ___ to have a cat."]],
+ trickLabel:"Unit 4 trick words",
+ stories:[
+ {id:"u4a",kind:"Everyday",title:"The Fastest Kid",text:[
+ "Jen and Ted were resting on the grass. “I am the fastest kid on this block,” said Ted.",
+ "“I can run faster!” said Jen. “Let's test it,” said Ted.",
+ "Dad yelled, “Get set… go!”",
+ "Ted dashed. Jen dashed. They rushed past the swings and the benches. They both huffed and puffed.",
+ "Jen jumped the last bump and landed at the end of the grass. She was the fastest!",
+ "Ted was panting. “You are faster than me,” he said. “Let's do it again!”",
+ "Dad handed them each a cup of milk. “Please rest first,” he said with a grin."],
+ qs:[{s:"remember",q:"Who said, “I am the fastest kid on this block”?",o:["Ted","Jen","Dad"],h:"Look at the very first part."},
+ {s:"order",q:"What did Jen do right before she landed at the end?",o:["She jumped the last bump","She had a cup of milk","She rested on the grass"],h:"Find the word “landed.”"},
+ {s:"word",q:"In the word fastest, which part is the suffix?",o:["-est","fast","-er"],h:"The suffix is the ending added to the base word."},
+ {s:"think",q:"Why did Ted say, “Let's do it again!”?",o:["He wanted another try to win","He was sleepy","He wanted milk"],h:"Who won the race?"}]},
+ {id:"u4b",kind:"Bible",title:"Noah and the Animals",text:[
+ "God said to Noah, “Get logs and fix up a big ship. A flood is coming.”",
+ "Noah and his sons cut the logs. They hammered and hammered. Bang, bang, bang!",
+ "Then the animals rushed in, two of each kind. Hens clucked. Lambs jumped. Pigs grunted.",
+ "Then it rained and rained for many days. But Noah, his family, and the animals were snug in the ark.",
+ "At last the land was dry. God put a rainbow up in the sky. “I will keep My promise,” said God.",
+ "Noah thanked God again and again."],
+ qs:[{s:"remember",q:"How many of each animal came in?",o:["Two","One","Ten"],h:"Find the part where the animals rushed in."},
+ {s:"order",q:"What happened after it rained for many days?",o:["The land got dry","Noah cut logs","The animals rushed in"],h:"Find “At last.”"},
+ {s:"word",q:"Which word has the suffix -ed?",o:["grunted","grunt","pigs"],h:"Look for the ending e, d."},
+ {s:"think",q:"Why did Noah thank God?",o:["God kept them all safe","The logs were big","The pigs grunted"],h:"Noah and the animals were snug in the ark the whole time."}]}]}
+];
+
+/* =================== STORY SHELF (bonus, read with help) =================== */
+const LEVELS=[{n:1,name:"Seed"},{n:2,name:"Sprout"},{n:3,name:"Blossom"}];
+const SHELF=[
+{id:"pip",level:1,kind:"Everyday",title:"Pip Finds His Ball",text:[
+"Pip is a little brown puppy. He has a red ball. He loves his red ball very much.",
+"One morning, Pip could not find his ball. He looked under the table. It was not there. He looked by the door. It was not there.",
+"Pip felt sad. His ears went down.",
+"Then Pip heard a squeak. It came from the couch! Pip pushed his nose under a pillow. There was his red ball!",
+"Pip wagged his tail. He ran outside to play."],
+qs:[
+{s:"remember",q:"What color is Pip's ball?",o:["Red","Blue","Yellow"],h:"Look at the very first part. It tells us about Pip's ball."},
+{s:"order",q:"Where did Pip look first?",o:["Under the table","By the door","Under a pillow"],h:"Find the part where Pip starts looking. Which place comes first?"},
+{s:"word",q:"“His ears went down.” That shows Pip felt…",o:["Sad","Sleepy","Hungry"],h:"Read the sentence right before it: “Pip felt ___.”"},
+{s:"think",q:"How did Pip feel at the end?",o:["Happy","Scared","Angry"],h:"Pip wagged his tail. What do dogs do that when they feel?"}]},
+{id:"david",level:1,kind:"Bible",title:"David and the Giant",text:[
+"David was a shepherd boy. He took care of his father's sheep.",
+"One day, David saw a giant named Goliath. Goliath was very big and very loud. He made fun of God's people. All the soldiers were afraid.",
+"But David was not afraid. He said, “God will help me.”",
+"David went to a stream. He picked up five smooth stones. He put one stone in his sling. He swung the sling round and round.",
+"The stone flew through the air. It hit Goliath, and the giant fell down!",
+"God helped David win."],
+qs:[
+{s:"remember",q:"What was David's job?",o:["A shepherd","A soldier","A king"],h:"Look at the first sentence. He took care of sheep."},
+{s:"remember",q:"How many stones did David pick up?",o:["Five","Two","Ten"],h:"Find the part about the stream."},
+{s:"word",q:"The stones were “smooth.” Smooth means…",o:["Not bumpy","Very sharp","Very heavy"],h:"Think of how a stone feels after water rubs it for a long time."},
+{s:"think",q:"Why was David not afraid?",o:["He knew God would help him","He was bigger than Goliath","He had a big sword"],h:"Read what David said out loud."}]},
+{id:"picnic",level:1,kind:"Everyday",title:"The Rainy Day Picnic",text:[
+"Mia and her dad wanted a picnic in the park. They packed apples, cheese, and juice.",
+"But when they opened the door, it was raining! Drip, drop, drip.",
+"Mia frowned. “Now we can't have our picnic,” she said.",
+"Dad smiled. “Let's have it inside,” he said.",
+"They put a big blanket on the living room floor. They set out the food. Mia brought her teddy bear to join them.",
+"They listened to the rain tap on the window. “This is the best picnic ever!” said Mia."],
+qs:[
+{s:"remember",q:"What did Mia and Dad pack?",o:["Apples, cheese, and juice","Sandwiches and milk","Cookies and cake"],h:"Look at the very first part of the story."},
+{s:"order",q:"What happened right after they opened the door?",o:["They saw it was raining","They ate their apples","Mia got her teddy bear"],h:"Find the word “door.” What comes next?"},
+{s:"word",q:"“Mia frowned.” Her face looked…",o:["Unhappy","Silly","Surprised"],h:"Read what Mia said right after she frowned."},
+{s:"think",q:"What does this story teach?",o:["A change of plans can still be fun","Never go outside","Bears love picnics"],h:"How did Mia feel at the very end?"}]},
+{id:"noah",level:2,kind:"Bible",title:"Noah's Big Boat",text:[
+"A long time ago, the world was full of people who did wrong things. But Noah loved God and obeyed Him.",
+"God told Noah, “Build a big boat called an ark. A flood is coming.” Noah worked hard for many years. Some people laughed at him, but Noah kept building.",
+"When the ark was finished, the animals came two by two. There were lions and lambs, giraffes and goats. Noah and his family went inside, and God shut the door.",
+"Then the rain came. It rained for forty days and forty nights. Water covered the whole earth, but everyone in the ark was safe.",
+"At last the rain stopped. Noah sent out a dove. It came back with an olive leaf in its beak. That meant the land was drying!",
+"When they came out, God put a rainbow in the sky. It was His promise to never flood the whole earth again."],
+qs:[
+{s:"remember",q:"How long did it rain?",o:["Forty days and forty nights","Seven days","One whole year"],h:"Find the part that starts “Then the rain came.”"},
+{s:"order",q:"What happened after the rain stopped?",o:["Noah sent out a dove","The animals came two by two","Noah built the ark"],h:"Find “At last the rain stopped.” What did Noah do next?"},
+{s:"word",q:"Noah “obeyed” God. That means he…",o:["Did what God said","Forgot what God said","Ran away from God"],h:"God told Noah to build an ark. What did Noah do?"},
+{s:"think",q:"Why did the olive leaf make Noah happy?",o:["It showed the land was drying","He was hungry for olives","The dove was lost"],h:"Read the sentence right after the dove came back."}]},
+{id:"sunflower",level:2,kind:"Everyday",title:"Maya's Sunflower",text:[
+"Maya got a tiny seed from her teacher. “Plant it, and it will grow into a sunflower,” said Mrs. Lopez.",
+"Maya put the seed in a cup of dirt. She gave it water and set it in the sunny window. The next morning, she ran to look. Nothing! Just dirt.",
+"“Why isn't it growing?” Maya asked her grandma.",
+"“Seeds need time,” Grandma said. “Be patient. Keep watering it every day.”",
+"So Maya did. Day after day, she watered her seed. After one week, a tiny green sprout poked out of the dirt. Maya clapped her hands.",
+"The sprout grew taller and taller. Grandma helped her move it outside to the garden. By summer, the sunflower was taller than Maya! Its big yellow face turned to follow the sun.",
+"“Waiting was hard,” said Maya, “but it was worth it.”"],
+qs:[
+{s:"remember",q:"Who gave Maya the seed?",o:["Her teacher","Her grandma","Her friend"],h:"Look at the first sentence. Mrs. Lopez is her teacher."},
+{s:"order",q:"What happened after one week?",o:["A green sprout poked out","The sunflower was taller than Maya","Maya planted the seed"],h:"Find the words “one week.”"},
+{s:"word",q:"“Be patient” means…",o:["Wait calmly","Hurry up","Give up"],h:"Grandma says seeds need time. What should Maya do while she waits?"},
+{s:"think",q:"Why did Maya see only dirt the first morning?",o:["Seeds grow slowly, so it was too soon","She forgot to plant it","Someone took the seed"],h:"What did Grandma say seeds need?"}]},
+{id:"lunch",level:2,kind:"Bible",title:"A Little Boy's Lunch",text:[
+"One day, a huge crowd came to hear Jesus teach. There were five thousand men, plus women and children! They listened all day long. By evening, everyone was hungry.",
+"“Where can we get food for all these people?” asked Jesus' friend Philip. They did not have nearly enough money.",
+"Then Andrew found a boy who had a small lunch. It was five little loaves of bread and two fish. “But what is that for so many people?” Andrew said.",
+"Jesus told everyone to sit down on the green grass. He took the boy's bread and fish, looked up to heaven, and thanked God. Then His helpers passed out the food.",
+"Everyone ate until they were full! When they gathered the leftovers, there were twelve baskets of food.",
+"The boy gave a little, and Jesus made it into a lot."],
+qs:[
+{s:"remember",q:"What was in the boy's lunch?",o:["Five loaves and two fish","Two loaves and five fish","Apples and cheese"],h:"Find the part where Andrew finds the boy."},
+{s:"order",q:"What did Jesus do right before the food was passed out?",o:["He thanked God","He sent everyone home","He bought more bread"],h:"Read the part about the green grass."},
+{s:"word",q:"“Leftovers” are…",o:["Food still there after everyone eats","Dirty dishes","People who left early"],h:"They filled twelve baskets after everyone was full."},
+{s:"think",q:"What does the last sentence teach us?",o:["A small gift can do big things with Jesus","Always pack a big lunch","Fish is better than bread"],h:"The boy gave a little. What did Jesus make it into?"}]},
+{id:"esther",level:3,kind:"Bible",title:"The Brave Queen",text:[
+"Long ago, there lived a young Jewish girl named Hadassah. She had another name, too: Esther. Her parents had died, so her cousin Mordecai raised her and loved her like a daughter.",
+"One day, the king of Persia was looking for a new queen. Esther was chosen! She went to live in the palace. Mordecai told her to keep it a secret that she was Jewish.",
+"The king had a proud helper named Haman. Haman was angry because Mordecai would not bow down to him. So Haman made a wicked plan to hurt all of the Jewish people.",
+"Mordecai sent Esther a message. “You must ask the king for help! Maybe God made you queen for such a time as this.”",
+"But there was a rule. No one could go see the king unless he called them. If he did not hold out his golden scepter, that person could die. Esther was scared. She asked her people to fast and pray for three days.",
+"Then Esther bravely went to the king. He held out his golden scepter! Esther told the king about Haman's plan. The king stopped Haman, and God's people were saved.",
+"Esther was brave because she trusted God."],
+qs:[
+{s:"remember",q:"What was Esther's other name?",o:["Hadassah","Mordecai","Persia"],h:"Look at the very first sentence. It's a name you know well!"},
+{s:"order",q:"What did Esther do right before she went to see the king?",o:["Asked her people to fast and pray","Became the queen","Sent a message to Haman"],h:"Find “Esther was scared.” What did she do next?"},
+{s:"word",q:"Haman made a “wicked” plan. Wicked means…",o:["Very bad","Very funny","Very small"],h:"His plan was to hurt people."},
+{s:"think",q:"Why was Esther scared to go see the king?",o:["She could die if he did not hold out his scepter","She did not like the palace","She had lost her crown"],h:"Read the part about the rule."}]},
+{id:"library",level:3,kind:"Everyday",title:"The Wrinkly Library Book",text:[
+"Sam loved his library book about sharks. He read it at breakfast. He read it in the car. He even read it in the bathtub. That was a mistake.",
+"Splash! The book slipped out of his hands and fell into the water. Sam pulled it out fast, but the pages were wet and wrinkly.",
+"Sam's stomach felt tight. The book was due back on Friday. Maybe nobody would notice, he thought. He could slip it into the return box and walk away.",
+"On Friday, Sam stood in front of the library with the book in his backpack. He looked at the return box. Then he looked at the front desk, where Ms. Grant was stacking books.",
+"Sam took a deep breath. He walked to the desk and held out the book. “I'm sorry,” he said. “I dropped it in the bath.”",
+"Ms. Grant looked at the wrinkly pages. Then she looked at Sam. “Thank you for telling me the truth,” she said. “That took courage. Let's see what we can do.”",
+"Sam helped her dry the pages with a hair dryer. The book still looked a little wavy, but it could be read. Sam walked home feeling light as a feather."],
+qs:[
+{s:"remember",q:"What was Sam's book about?",o:["Sharks","Dinosaurs","Outer space"],h:"Look at the very first sentence."},
+{s:"order",q:"What did Sam do right after he took a deep breath?",o:["Told Ms. Grant the truth","Dropped the book in the bath","Put it in the return box"],h:"Find “deep breath.” What comes next?"},
+{s:"word",q:"“That took courage.” Courage means…",o:["Being brave even when you feel scared","Being very fast","Being very quiet"],h:"Sam was nervous, but he told the truth anyway."},
+{s:"think",q:"Why did Sam feel “light as a feather” at the end?",o:["He told the truth, so he stopped worrying","His backpack was empty","He was flying home"],h:"How did his stomach feel before he told the truth?"}]},
+{id:"daniel",level:3,kind:"Bible",title:"Daniel and the Lions",text:[
+"Daniel loved God with all his heart. Three times every day, he knelt by his open window and prayed.",
+"Daniel worked for King Darius, and he did his job very well. The king planned to put Daniel in charge of the whole kingdom. This made the other leaders jealous. They looked for something wrong that Daniel had done, but they could not find anything.",
+"So they tricked the king. “Make a new law,” they said. “For thirty days, people may pray only to you, O king. Anyone who breaks the law will be thrown to the lions.” The king signed it.",
+"Daniel heard about the new law. But he went home, opened his window, and prayed to God, just like always.",
+"The leaders ran to tell the king. King Darius was very sad, because he liked Daniel. But a law was a law. Daniel was put in the lions' den, and a big stone covered the door.",
+"The king could not sleep that night. Early in the morning, he hurried to the den. “Daniel! Did your God save you?”",
+"“Yes!” Daniel called. “God sent His angel to shut the lions' mouths!”",
+"The king was overjoyed. He told everyone in his kingdom to honor Daniel's God."],
+qs:[
+{s:"remember",q:"How many times a day did Daniel pray?",o:["Three","One","Seven"],h:"Look at the second sentence."},
+{s:"order",q:"What happened right after the king signed the law?",o:["Daniel went home and prayed like always","An angel shut the lions' mouths","The king could not sleep"],h:"Find “The king signed it.” Read the next part."},
+{s:"word",q:"The leaders were “jealous.” Jealous means…",o:["Upset that someone else got something you wanted","Very sleepy","Kind and helpful"],h:"The king was going to put Daniel in charge, not them."},
+{s:"think",q:"Why couldn't the king sleep that night?",o:["He was worried about Daniel","The lions were too loud","He was hungry"],h:"The king liked Daniel. Where was Daniel that night?"}]}
+];
+
+const SKILL={remember:"Remember",order:"What came first?",word:"Word detective",think:"Think about it"};
+UNITS.forEach(u=>u.stories.forEach(s=>{s.unit=u.n}));
+const ALLSTORIES=[...UNITS.flatMap(u=>u.stories),...SHELF];
+const byId=id=>ALLSTORIES.find(s=>s.id===id);
+const unitOf=n=>UNITS.find(u=>u.n===n);
+
+/* =================== STORAGE =================== */
+const KEY="hadassah-reading-tree-v1";
+let S={best:{},done:{},unlockAll:false};
+try{const raw=localStorage.getItem(KEY);if(raw)S=Object.assign(S,JSON.parse(raw))}catch(e){}
+S.done=S.done||{};S.history=S.history||[];S.days=S.days||[];S.skills=S.skills||{};S.words=S.words||{};S.resetAt=S.resetAt||0;S.settingsAt=S.settingsAt||0;
+const localIso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function save(){persist();schedulePush()}
+/* The grown-up PIN lives under its own key so "Start over" never clears it. Hashed so it isn't readable in plain text. */
+const PINKEY="hadassah-reading-tree-pin";
+const hashPin=p=>{let h=2166136261;for(const c of p+"myrtle"){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return (h>>>0).toString(36)};
+const pinRec=()=>{try{const v=localStorage.getItem(PINKEY);if(!v)return null;return v[0]==="{"?JSON.parse(v):{h:v,at:0}}catch(e){return null}};
+const getPin=()=>{const r=pinRec();return r?r.h:null};
+const storePin=(h,at)=>{try{localStorage.setItem(PINKEY,JSON.stringify({h,at}))}catch(e){}};
+const setPin=p=>storePin(hashPin(p),Date.now());
+let parentOk=false;
+/* The family code connects devices (and resets a forgotten PIN). Not case-sensitive. */
+const CODEKEY="hadassah-reading-tree-code";
+const normCode=c=>String(c||"").trim().toLowerCase().replace(/\s+/g," ");
+const getCode=()=>{try{return localStorage.getItem(CODEKEY)}catch(e){return null}};
+const setCode=c=>{try{c?localStorage.setItem(CODEKEY,c):localStorage.removeItem(CODEKEY)}catch(e){}};
+
+/* =================== SYNC (works once the site is hosted with the api/progress function) =================== */
+const canSync=/^https?:$/.test(location.protocol);
+let sync={status:"idle",at:0,msg:""};
+let view="",pushTimer=null,retryTimer=null,pushing=false,pushAgain=false,pushFails=0,adminPoll=null;
+function stopAdminPoll(){clearInterval(adminPoll);adminPoll=null}
+async function api(method,body){
+  const code=getCode();if(!code)throw new Error("No family code on this device.");
+  const r=await fetch("/api/progress?code="+encodeURIComponent(code),{method,cache:"no-store",headers:body?{"Content-Type":"application/json"}:{},body:body?JSON.stringify(body):undefined});
+  let j={};try{j=await r.json()}catch(e){}
+  if(!r.ok)throw new Error(j.error||(r.status===404?"The sync service isn't on this website yet.":"Problem "+r.status));
+  return j;
+}
+const snapshot=()=>{const p=pinRec();return {...S,pin:p?p.h:null,pinAt:p?p.at:0}};
+/* Folds another device's copy into this one. Lessons are unioned, bests keep the higher result,
+   and the newest reset / setting / PIN change wins. Returns true when anything here changed. */
+function mergeRemote(r){
+  if(!r||typeof r!=="object")return false;
+  let ch=false;
+  const lp=pinRec();
+  if(r.pin&&(!lp||((r.pinAt||0)>(lp.at||0)&&r.pin!==lp.h))){storePin(r.pin,r.pinAt||0);ch=true}
+  const rr=r.resetAt||0,lr=S.resetAt||0;
+  if(lr>rr)return ch;
+  if(rr>lr){S={best:{},done:{},unlockAll:false,history:[],days:[],skills:{},words:{},resetAt:rr,settingsAt:0};ch=true}
+  for(const id in r.best||{}){const a=S.best[id],b=r.best[id];if(!b)continue;
+    if(!a||b.stars>a.stars||(b.stars===a.stars&&((b.score||0)>(a.score||0)||(b.last||"")>(a.last||"")))){S.best[id]={...b,tries:Math.max(b.tries||0,a?a.tries||0:0)};ch=true}
+    else if((b.tries||0)>(a.tries||0)){a.tries=b.tries;ch=true}}
+  const hk=h=>`${h.id}|${h.d}|${h.t||""}|${h.ts||""}`,seen=new Set(S.history.map(hk));
+  for(const h of r.history||[])if(!seen.has(hk(h))){S.history.push(h);seen.add(hk(h));ch=true}
+  const when=h=>h.ts||Date.parse(h.d+"T12:00")||0;
+  S.history.sort((a,b)=>when(a)-when(b));if(S.history.length>300)S.history=S.history.slice(-300);
+  for(const d of r.days||[])if(!S.days.includes(d)){S.days.push(d);ch=true}
+  S.days.sort();
+  for(const k in r.skills||{}){const a=S.skills[k],b=r.skills[k];if(b&&(!a||b[1]>a[1])){S.skills[k]=b.slice();ch=true}}
+  for(const w in r.words||{})if((r.words[w]||0)>(S.words[w]||0)){S.words[w]=r.words[w];ch=true}
+  for(const k in r.done||{})if(r.done[k]&&!S.done[k]){S.done[k]=true;ch=true}
+  if((r.settingsAt||0)>(S.settingsAt||0)){S.unlockAll=!!r.unlockAll;S.settingsAt=r.settingsAt;ch=true}
+  return ch;
+}
+/* pull → "changed" | "same" | "none" (nothing stored for this code yet) | "error" (see sync.msg) */
+async function pull(){
+  if(!canSync||!getCode())return "none";
+  sync.status="busy";
+  try{const j=await api("GET");const res=j.data?(mergeRemote(j.data)?"changed":"same"):"none";if(res==="changed")persist();sync={status:"ok",at:Date.now(),msg:""};return res}
+  catch(e){sync={status:"error",at:sync.at,msg:e.message};return "error"}
+}
+async function push(){
+  if(!canSync||!getCode())return;
+  if(pushing){pushAgain=true;return}
+  pushing=true;sync.status="busy";
+  try{
+    const j=await api("GET");if(j.data&&mergeRemote(j.data))persist();
+    const posted=await api("POST",{data:snapshot()});
+    if(posted.data&&mergeRemote(posted.data))persist();
+    pushFails=0;sync={status:"ok",at:Date.now(),msg:""};
+  }catch(e){
+    sync={status:"error",at:sync.at,msg:e.message};
+    if(pushFails<4){pushFails++;clearTimeout(retryTimer);retryTimer=setTimeout(()=>{retryTimer=null;push()},3000*pushFails)}
+  }
+  pushing=false;if(pushAgain){pushAgain=false;push()}
+  else if(view==="admin")admin(true,true);
+}
+function schedulePush(){if(!canSync||!getCode())return;clearTimeout(pushTimer);pushTimer=setTimeout(()=>{pushTimer=null;push()},800)}
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden||!canSync||!getCode())return;
+  if(view==="admin")pull().then(r=>{if(r==="changed"&&view==="admin")admin(true,true)});
+  else if(view==="home")pull().then(r=>{schedulePush();if(r==="changed"&&view==="home")home()});
+});
+window.addEventListener("pagehide",()=>{
+  if(!canSync||!getCode())return;
+  if(!pushTimer&&sync.status!=="error")return;
+  clearTimeout(pushTimer);pushTimer=null;
+  try{navigator.sendBeacon("/api/progress?code="+encodeURIComponent(getCode()),new Blob([JSON.stringify({data:snapshot()})],{type:"application/json"}))}catch(e){}
+});
+
+/* =================== STARS & UNLOCKING =================== */
+const starsOf=id=>(S.best[id]||{}).stars||0;
+const unitIds=u=>[...(u.vowels?[`u${u.n}-vowel`]:[]),`u${u.n}-spell`,`u${u.n}-trick`,...u.stories.map(s=>s.id)];
+const unitStars=u=>unitIds(u).reduce((a,id)=>a+starsOf(id),0);
+const unitMax=u=>unitIds(u).length*3;
+const UNLOCK_AT=6;
+const START_UNIT=2;
+const unitOpen=n=>n<=START_UNIT||S.unlockAll||unitStars(unitOf(n-1))>=UNLOCK_AT;
+const shelfPassed=lv=>SHELF.filter(s=>s.level===lv&&(S.best[s.id]||{}).score>=3).length;
+const shelfOpen=lv=>lv===1||S.unlockAll||shelfPassed(lv-1)>=2;
+const MAXSTARS=UNITS.reduce((a,u)=>a+unitMax(u),0)+SHELF.length*3;
+const totalStars=()=>Object.keys(S.best).reduce((a,id)=>a+starsOf(id),0);
+const currentUnit=()=>{let c=START_UNIT;UNITS.forEach(u=>{if(unitOpen(u.n)&&u.n>=START_UNIT)c=u.n});return c};
+function starsFor(right,total){if(right===total)return 3;if(right>=Math.ceil(total*2/3))return 2;return 1}
+
+/* =================== SPEECH =================== */
+const canSpeak=("speechSynthesis" in window)&&("SpeechSynthesisUtterance" in window);
+function stopTalk(){try{canSpeak&&speechSynthesis.cancel()}catch(e){}}
+function say(text,rate,onEnd){
+  if(!canSpeak)return;
+  try{stopTalk();const u=new SpeechSynthesisUtterance(text);u.rate=rate||0.85;u.pitch=1.05;if(onEnd)u.onend=onEnd;speechSynthesis.speak(u)}catch(e){}
+}
+
+/* =================== ICONS =================== */
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const STAR='<path d="M12 2.6l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17l-5.7 3.1 1.2-6.4L2.8 9.3l6.4-.8z"/>';
+const starSvg=(on,cls="",style="")=>`<svg class="star ${on?"on":""} ${cls}" style="${style}" viewBox="0 0 24 24" aria-hidden="true">${STAR}</svg>`;
+const starsRow=n=>`<span class="stars" role="img" aria-label="${n} of 3 stars">${[0,1,2].map(i=>starSvg(i<n)).join("")}</span>`;
+const BLOSSOM_ICON='<svg viewBox="-12 -12 24 24" aria-hidden="true">'+[0,72,144,216,288].map(d=>{const t=d*Math.PI/180;return `<circle cx="${(5.5*Math.cos(t)).toFixed(1)}" cy="${(5.5*Math.sin(t)).toFixed(1)}" r="5" fill="var(--blossom)"/>`}).join("")+'<circle r="3" fill="var(--sun)"/></svg>';
+const ICON={
+ back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+ speak:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/></svg>',
+ stop:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
+ lock:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>',
+ book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 012-2h13v14H6a2 2 0 00-2 2zm0 0a2 2 0 002 2h13"/></svg>',
+ sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>',
+ medal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="5.5"/><path d="M8.5 13.5L6 21l6-3 6 3-2.5-7.5"/></svg>',
+ leaf:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19C5 10.5 10.5 5 19.5 4.5 20 13.5 14.5 19 5 19z"/><path d="M5 19c3-5 7-9 12-12"/></svg>',
+ tree:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="5.5"/><path d="M12 21.5v-6M9.5 14l-2 3.5M14.5 14l2 3.5"/></svg>'
+};
+
+/* =================== THE MYRTLE TREE =================== */
+const SPOTS=Array.from({length:MAXSTARS},(_,i)=>{const r=Math.sqrt((i+.5)/MAXSTARS),a=i*2.39996;return[160+r*118*Math.cos(a),86+r*64*Math.sin(a)]});
+function treeSvg(count,fresh){
+  const crown=[[160,72,58],[104,96,46],[216,96,46],[128,52,40],[192,52,40],[160,116,48],[70,112,28],[250,112,28]];
+  const leaves=crown.map(([x,y,r],i)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="var(--${i%2?"leaf2":"leaf"})"/>`).join("");
+  const shown=Math.min(count,MAXSTARS);
+  const blossoms=SPOTS.map(([x,y],i)=>{
+    if(i>=shown)return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="var(--blossom-soft)" opacity=".7"/>`;
+    const petals=[0,72,144,216,288].map(d=>{const t=d*Math.PI/180;return `<circle cx="${(x+3.8*Math.cos(t)).toFixed(1)}" cy="${(y+3.8*Math.sin(t)).toFixed(1)}" r="3.3" fill="var(--blossom)"/>`}).join("");
+    const isNew=i>=shown-fresh;
+    return `<g class="blossom ${isNew?"new":""}" style="animation-delay:${isNew?(i-(shown-fresh))*0.15:0}s">${petals}<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="var(--sun)"/></g>`;
+  }).join("");
+  return `<svg viewBox="0 0 320 222" role="img" aria-label="Myrtle tree with ${count} blossoms">
+    <path d="M150 220 C152 180 150 160 156 128 L164 128 C170 160 168 180 172 220 Z" fill="var(--bark)"/>
+    <path d="M158 140 C140 128 120 118 100 110 M162 136 C182 124 200 116 220 108 M160 132 L160 96" stroke="var(--bark)" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <ellipse cx="160" cy="219" rx="90" ry="4" fill="var(--line)"/>
+    ${leaves}${blossoms}</svg>`;
+}
+
+/* =================== VIEWS =================== */
+let lastStars=null;
+function go(html,keepScroll){stopAdminPoll();stopTalk();view="";const y=keepScroll?window.scrollY:0;app.innerHTML=html;window.scrollTo(0,y)}
+const app=document.getElementById("app");
+const backBtn=(label="Home")=>`<button class="btn" id="back">${ICON.back} ${label}</button>`;
+
+function stepBtn(attr,k,nm,status){return `<button class="step" ${attr}><span class="k">${k}</span><span class="nm">${esc(nm)}</span>${status}</button>`}
+const doneMark=key=>S.done[key]?`<span class="done">✓ Done</span>`:`<span class="todo">Practice</span>`;
+const starMark=id=>S.best[id]?starsRow(starsOf(id)):`<span class="todo">Not tried yet</span>`;
+
+function home(){
+  parentOk=false;
+  if(canSync&&getCode())pull().then(r=>{schedulePush();if(r==="changed"&&view==="home")home()});
+  const total=totalStars();
+  const fresh=lastStars==null?0:Math.max(0,total-lastStars);
+  lastStars=total;
+  const here=currentUnit();
+  const streak=calcStreak();
+  const badgesGot=badgeList().filter(b=>b.got).length;
+  const units=UNITS.map(u=>{
+    const open=unitOpen(u.n);
+    const head=`<div class="unithead"><div class="t"><span class="eyebrow">Unit ${u.n}</span><h2>${esc(u.title)}</h2><span class="sub">${esc(u.sub)}</span></div>
+      <div class="row" style="justify-content:flex-end">${u.n===here&&open?`<span class="chip">You are here</span>`:""}${open?`<span class="chip count">${unitStars(u)} of ${unitMax(u)} stars</span>`:""}</div></div>`;
+    if(!open){
+      const prev=unitOf(u.n-1);
+      return `<section class="unit locked">${head}<p class="lockmsg">${ICON.lock} Earn ${UNLOCK_AT} stars in Unit ${prev.n} to open this unit. (${unitStars(prev)} so far)</p></section>`;
+    }
+    const steps=[
+      ...(u.vowels?[stepBtn(`data-act="vowels" data-u="${u.n}"`,"Warm-up","Vowel sounds",starMark(`u${u.n}-vowel`))]:[]),
+      stepBtn(`data-act="cards" data-u="${u.n}"`,"1 · Learn","Sound cards",doneMark(`u${u.n}-cards`)),
+      stepBtn(`data-act="tap" data-u="${u.n}"`,"2 · Tap","Tap and read",doneMark(`u${u.n}-tap`)),
+      stepBtn(`data-act="spell" data-u="${u.n}"`,"3 · Spell","Spell it",starMark(`u${u.n}-spell`)),
+      stepBtn(`data-act="trick" data-u="${u.n}"`,"4 · Trick words","Find the word",starMark(`u${u.n}-trick`)),
+      ...u.stories.map((s,i)=>stepBtn(`data-story="${s.id}"`,`${5+i} · ${s.kind} story`,s.title,starMark(s.id)))
+    ].join("");
+    return `<section class="unit ${u.n===here?"here":""}">${head}<div class="steps">${steps}</div></section>`;
+  }).join("");
+
+  const shelf=LEVELS.map(L=>{
+    const open=shelfOpen(L.n);
+    const cards=SHELF.filter(s=>s.level===L.n).map(s=>`<button class="card" data-story="${s.id}" ${open?"":"disabled"}>
+        <span class="kind ${s.kind==="Everyday"?"every":""}">${s.kind}</span><h3>${esc(s.title)}</h3>
+        ${open?starsRow(starsOf(s.id)):`<span class="lockmsg">${ICON.lock} Locked</span>`}</button>`).join("");
+    const note=open?"":`<span class="note">Pass 2 ${LEVELS[L.n-2].name} stories to open (${shelfPassed(L.n-1)} of 2)</span>`;
+    return `<div class="levelhead"><span class="eyebrow">Level ${L.n}</span><h3>${L.name}</h3>${note}</div><div class="cards">${cards}</div>`;
+  }).join("");
+
+  go(`<header class="hero"><h1>Hadassah's Reading Tree</h1>
+      <p>Hadassah means <b>myrtle tree</b>. Practice your sounds, read the stories, and watch your tree bloom.</p></header>
+    <div class="treecard">${treeSvg(total,fresh)}
+      <div class="tally"><span class="n">${total}</span> blossoms</div>
+      <div class="rule">Every ${starSvg(true)} you earn grows 1 blossom.</div>
+      ${streak>=2?`<div class="rule">${ICON.sun} <b>${streak} days in a row!</b> Keep it going.</div>`:""}</div>
+    <div class="sectionhead"><span class="eyebrow">Phonics</span><h2>Sound Units</h2><p>Do the steps in order. Each story uses the sounds from its unit.</p></div>
+    ${units}
+    <p class="later">More units are on the way as you get there.</p>
+    <section class="shelf"><div class="sectionhead"><span class="eyebrow">Bonus</span><h2>Story Shelf</h2><p>Longer stories with harder words. Tap any word to hear it, or have the story read to you.</p></div>${shelf}</section>
+    <section class="page" style="gap:12px"><div class="sectionhead"><span class="eyebrow">Rewards</span><h2>My Badges</h2><p>${badgesGot} of ${badgeList().length} earned. Each one tells you how to get it.</p></div><div class="badgegrid">${badgeGrid()}</div></section>
+    <div class="center"><button class="linkbtn" id="grown">${ICON.lock} For grown-ups</button></div>`);
+  view="home";
+  app.querySelectorAll("[data-story]").forEach(b=>b.onclick=()=>read(b.dataset.story));
+  app.querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>{
+    const u=unitOf(+b.dataset.u),a=b.dataset.act;
+    if(a==="vowels")vowels(u);else if(a==="cards")cards(u);else if(a==="tap")tapRead(u,0);else wordGame(u,a);
+  });
+  document.getElementById("grown").onclick=()=>gate();
+}
+
+/* ---- Warm-up: vowel sounds ---- */
+function vowels(u){
+  const V=u.vowels;
+  go(`<div class="bar">${backBtn()}<span class="tip">Unit ${u.n} · Vowel warm-up</span></div>
+    <section class="page"><h2>Vowel Sounds</h2>
+      <p class="note">${esc(V.note)}</p>
+      <p class="lead">For each card, say the letter, the key word, and the sound: <b>a, apple, /ă/</b>. Tap a card to hear its key word.</p>
+      <div class="soundgrid">${V.cards.map(([p,k],i)=>`<button class="sound" data-i="${i}" aria-label="${esc(p)}, as in ${esc(k)}"><span class="pat">${esc(p)}</span><span class="kw"><b>${esc(k[0])}</b>${esc(k.slice(1))}</span></button>`).join("")}</div>
+    </section>
+    <div class="center"><button class="btn go" id="next">Play: Hear the vowel</button></div>`);
+  document.getElementById("back").onclick=home;
+  document.getElementById("next").onclick=()=>vowelGame(u);
+  app.querySelectorAll(".sound").forEach(b=>b.onclick=()=>{b.classList.add("heard");say(V.cards[+b.dataset.i][1],0.75)});
+}
+function vowelGame(u,i=0,firsts=[]){
+  const V=u.vowels,[word,vow]=V.words[i];
+  const k=word.indexOf(vow);
+  const masked=`${esc(word.slice(0,k))}<span class="vblank">&nbsp;</span>${esc(word.slice(k+1))}`;
+  const dots=V.words.map((_,j)=>`<span class="dot ${j<i?"done":j===i?"now":""}"></span>`).join("");
+  go(`<div class="bar">${backBtn()}<div class="dots" role="img" aria-label="Word ${i+1} of ${V.words.length}">${dots}</div></div>
+    <section class="page">
+      <span class="skill">Vowel sounds</span>
+      <p class="q">Listen. Which vowel do you hear in the middle?</p>
+      ${canSpeak?`<button class="bigsay" id="sayit" aria-label="Hear the word again">${ICON.speak}</button>`:""}
+      <div class="whole" id="whole" aria-live="polite">${masked}</div>
+      <div class="opts vowels">${V.cards.map(([p])=>`<button class="opt" data-v="${p}">${p}</button>`).join("")}</div>
+      <div id="fb"></div>
+    </section>`);
+  document.getElementById("back").onclick=home;
+  const speakIt=()=>say(word,0.65);
+  const sb=document.getElementById("sayit");if(sb)sb.onclick=speakIt;
+  setTimeout(speakIt,250);
+  let tried=false;const fb=document.getElementById("fb");
+  app.querySelectorAll(".opt").forEach(btn=>btn.onclick=()=>{
+    if(btn.dataset.v===vow){
+      btn.classList.add("right");app.querySelectorAll(".opt").forEach(b=>b.disabled=true);
+      document.getElementById("whole").textContent=word;
+      const got=!tried,last=i===V.words.length-1;
+      const key=V.cards.find(c=>c[0]===vow)[1];
+      fb.innerHTML=`<div class="feedback ok"><b>${got?["Yes!","You got it!","Great listening!","Super!"][i%4]:"Yes! You found it."}</b><span>${esc(vow)}, ${esc(key)}, like in ${esc(word)}.</span><div><button class="btn go" id="next">${last?"See my stars":"Next word"}</button></div></div>`;
+      const n=document.getElementById("next");n.focus();
+      n.onclick=()=>last?finish({id:`u${u.n}-vowel`,title:`Unit ${u.n}: Vowel sounds`,firsts:[...firsts,got],again:()=>vowelGame(u),unit:u}):vowelGame(u,i+1,[...firsts,got]);
+    }else{
+      if(!tried){S.words[word]=(S.words[word]||0)+1;save()}
+      tried=true;btn.classList.add("wrong","shake");btn.disabled=true;
+      fb.innerHTML=`<div class="feedback hint"><b>Not quite. Try again!</b><span>Say the word slowly. Does the middle sound like apple, Ed, itch, octopus, or up?</span></div>`;
+      speakIt();
+    }
+  });
+}
+
+/* ---- Step 1: sound cards ---- */
+function cards(u){
+  const hl=(pat,kw)=>{const p=pat.replace(/^-/,"");const i=kw.lastIndexOf(p);return i<0?esc(kw):esc(kw.slice(0,i))+"<b>"+esc(p)+"</b>"+esc(kw.slice(i+p.length))};
+  go(`<div class="bar">${backBtn()}<span class="tip">Unit ${u.n} · Sound cards</span></div>
+    <section class="page"><h2>${esc(u.title)}</h2>
+      <p class="note">${esc(u.note)}</p>
+      <p class="lead">Say the sound. Then tap the card to hear the key word.</p>
+      <div class="soundgrid">${u.cards.map(([p,k],i)=>`<button class="sound" data-i="${i}" aria-label="${esc(p)}, as in ${esc(k)}"><span class="pat">${esc(p)}</span><span class="kw">${hl(p,k)}</span></button>`).join("")}</div>
+    </section>
+    <div class="center"><button class="btn go" id="next">Next: Tap and read</button></div>`);
+  S.done[`u${u.n}-cards`]=true;save();
+  document.getElementById("back").onclick=home;
+  document.getElementById("next").onclick=()=>tapRead(u,0);
+  app.querySelectorAll(".sound").forEach(b=>b.onclick=()=>{b.classList.add("heard");say(u.cards[+b.dataset.i][1],0.75)});
+}
+
+/* ---- Step 2: tap and read ---- */
+function tapRead(u,i){
+  const item=u.tap[i];
+  const parts=item.filter(x=>typeof x==="string");
+  const extra=item.find(x=>typeof x==="object")||{};
+  const word=parts.join("").replace(/-/g,"");
+  let lit=0;
+  go(`<div class="bar">${backBtn()}<span class="tip">Unit ${u.n} · Word ${i+1} of ${u.tap.length}</span></div>
+    <section class="page">
+      <span class="skill">Tap and read</span>
+      <p class="lead">Tap each box and say its sound. Then blend them into one word.</p>
+      <div class="taprow">${parts.map((p,k)=>`<button class="tapbox ${p.startsWith("-")?"suffix":""}" data-k="${k}" aria-label="Sound ${k+1}">${esc(p.replace(/^-/,""))}</button>`).join("")}</div>
+      <div class="dotrow" aria-hidden="true">${parts.map(()=>`<span class="tapdot"></span>`).join("")}</div>
+      <div class="whole dim" id="whole" aria-live="polite">${esc(word)}</div>
+      ${extra.n?`<p class="note" style="text-align:center">${esc(extra.n)}</p>`:""}
+      <div class="row">
+        <button class="btn" id="hear" disabled>${ICON.speak} Check: hear it</button>
+        <button class="btn go" id="next" disabled>${i===u.tap.length-1?"All done!":"Next word"}</button>
+      </div>
+    </section>`);
+  document.getElementById("back").onclick=home;
+  const boxes=[...app.querySelectorAll(".tapbox")],dots=[...app.querySelectorAll(".tapdot")];
+  const hear=document.getElementById("hear"),next=document.getElementById("next");
+  boxes.forEach((b,k)=>b.onclick=()=>{
+    if(k!==lit)return;
+    b.classList.add("lit");dots[k].classList.add("lit");lit++;
+    if(lit===parts.length){document.getElementById("whole").classList.remove("dim");hear.disabled=false;next.disabled=false;next.focus()}
+  });
+  hear.onclick=()=>say(word,0.7);
+  next.onclick=()=>{if(i<u.tap.length-1)tapRead(u,i+1);else{S.done[`u${u.n}-tap`]=true;save();wordGame(u,"spell")}};
+}
+
+/* ---- Steps 3 & 4: spell it / find the trick word ---- */
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function wordGame(u,kind,i=0,firsts=[]){
+  const spell=kind==="spell";
+  const list=spell?u.spell:u.trick;
+  const it=list[i];
+  const target=it[0];
+  const sentence=spell?it[3]:it[1];
+  let opts;
+  if(spell)opts=shuffle([it[0],it[1],it[2]]);
+  else opts=shuffle([target,...shuffle(list.map(x=>x[0]).filter(w=>w!==target)).slice(0,2)]);
+  const dots=list.map((_,k)=>`<span class="dot ${k<i?"done":k===i?"now":""}"></span>`).join("");
+  const sent=esc(sentence).replace("___",'<span class="blank"></span>');
+  go(`<div class="bar">${backBtn()}<div class="dots" role="img" aria-label="Word ${i+1} of ${list.length}">${dots}</div></div>
+    <section class="page">
+      <span class="skill">${spell?"Spell it":u.trickLabel}</span>
+      <p class="q">${spell?"Listen. Which one is spelled right?":"Listen. Find the word you hear."}</p>
+      ${canSpeak?`<button class="bigsay" id="sayit" aria-label="Hear the word again">${ICON.speak}</button>`:""}
+      <p class="sentence">${sent}</p>
+      <div class="opts words">${opts.map((o,k)=>`<button class="opt" data-k="${k}">${esc(o)}</button>`).join("")}</div>
+      <div id="fb"></div>
+    </section>`);
+  document.getElementById("back").onclick=home;
+  const speakIt=()=>say(target,0.7);
+  const sb=document.getElementById("sayit");if(sb)sb.onclick=speakIt;
+  setTimeout(speakIt,250);
+  let tried=false;const fb=document.getElementById("fb");
+  app.querySelectorAll(".opt").forEach(btn=>btn.onclick=()=>{
+    const o=opts[+btn.dataset.k];
+    if(o===target){
+      btn.classList.add("right");app.querySelectorAll(".opt").forEach(b=>b.disabled=true);
+      const got=!tried,last=i===list.length-1;
+      fb.innerHTML=`<div class="feedback ok"><b>${got?["You got it!","Yes!","Great spelling!","Super!"][i%4]:"Yes! You found it."}</b><div><button class="btn go" id="next">${last?"See my stars":"Next word"}</button></div></div>`;
+      const n=document.getElementById("next");n.focus();
+      n.onclick=()=>last?finish({id:`u${u.n}-${kind}`,title:`Unit ${u.n}: ${spell?"Spell it":"Trick words"}`,firsts:[...firsts,got],again:()=>wordGame(u,kind),unit:u}):wordGame(u,kind,i+1,[...firsts,got]);
+    }else{
+      if(!tried){S.words[target]=(S.words[target]||0)+1;save()}
+      tried=true;btn.classList.add("wrong","shake");btn.disabled=true;
+      fb.innerHTML=`<div class="feedback hint"><b>Not quite. Try again!</b><span>${spell?"Listen again and tap out each sound on your fingers.":"Listen again. Look at the first letter."}</span></div>`;
+      speakIt();
+    }
+  });
+}
+
+/* ---- Stories ---- */
+function trickSet(s){if(!s.unit)return new Set();const u=unitOf(s.unit);return new Set(u.trick.map(t=>t[0].toLowerCase()))}
+function read(id){
+  const s=byId(id),tricks=trickSet(s);
+  const meta=s.unit?`Unit ${s.unit} story`:`Story Shelf · Level ${s.level} · ${LEVELS[s.level-1].name}`;
+  const paras=s.text.map(p=>`<p>${p.split(/(\s+)/).map(t=>{if(!/\S/.test(t))return t;const bare=t.toLowerCase().replace(/[^a-z']/g,"");return `<span class="w ${tricks.has(bare)?"trick":""}">${esc(t)}</span>`}).join("")}</p>`).join("");
+  go(`<div class="bar">${backBtn()}
+      ${canSpeak?`<button class="btn" id="talk">${ICON.speak} Read it to me</button>`:""}</div>
+    <article class="page">
+      <div class="meta"><span class="kind ${s.kind==="Everyday"?"every":""}">${s.kind}</span><span class="tip">${meta}</span></div>
+      <h2>${esc(s.title)}</h2>
+      <div class="story">${paras}</div>
+      <p class="tip">${tricks.size?"Wavy lines mark this unit's trick words. ":""}${canSpeak?"Stuck on a word? Tap it to hear it.":""}</p>
+    </article>
+    <div class="center"><button class="btn go" id="ready">I'm done reading!</button></div>`);
+  document.getElementById("back").onclick=home;
+  document.getElementById("ready").onclick=()=>quiz(id);
+  const talk=document.getElementById("talk");
+  if(talk){let on=false;talk.onclick=()=>{
+    if(on){stopTalk();on=false;talk.innerHTML=`${ICON.speak} Read it to me`;return}
+    on=true;talk.innerHTML=`${ICON.stop} Stop reading`;
+    say(s.title+". "+s.text.join(" "),0.85,()=>{on=false;talk.innerHTML=`${ICON.speak} Read it to me`});
+  }}
+  app.querySelectorAll(".w").forEach(w=>w.onclick=()=>{
+    app.querySelectorAll(".w.said").forEach(x=>x.classList.remove("said"));
+    w.classList.add("said");say(w.textContent.replace(/[^\w']/g,""),0.7);
+    setTimeout(()=>w.classList.remove("said"),1200);
+  });
+}
+
+function quiz(id,i=0,firsts=[]){
+  const s=byId(id),q=s.qs[i];
+  const opts=shuffle(q.o.map((t,k)=>({t,ok:k===0})));
+  const dots=s.qs.map((_,k)=>`<span class="dot ${k<i?"done":k===i?"now":""}"></span>`).join("");
+  go(`<div class="bar"><button class="btn" id="back">${ICON.back} Back to story</button><div class="dots" role="img" aria-label="Question ${i+1} of ${s.qs.length}">${dots}</div></div>
+    <section class="page">
+      <span class="skill">${SKILL[q.s]}</span>
+      <div class="bar" style="align-items:flex-start"><p class="q" style="flex:1;min-width:0">${esc(q.q)}</p>
+        ${canSpeak?`<button class="btn" id="sayq" aria-label="Read the question to me">${ICON.speak}</button>`:""}</div>
+      <div class="opts">${opts.map((o,k)=>`<button class="opt" data-k="${k}"><span class="ab">${"ABC"[k]}</span><span>${esc(o.t)}</span></button>`).join("")}</div>
+      <div id="fb"></div>
+    </section>`);
+  document.getElementById("back").onclick=()=>read(id);
+  const sq=document.getElementById("sayq");
+  if(sq)sq.onclick=()=>say(q.q+" "+opts.map((o,k)=>"ABC"[k]+": "+o.t).join(". "),0.85);
+  let tried=false;const fb=document.getElementById("fb");
+  app.querySelectorAll(".opt").forEach(btn=>btn.onclick=()=>{
+    const o=opts[+btn.dataset.k];
+    if(o.ok){
+      btn.classList.add("right");app.querySelectorAll(".opt").forEach(b=>b.disabled=true);
+      const got=!tried,last=i===s.qs.length-1;
+      fb.innerHTML=`<div class="feedback ok"><b>${got?["You got it!","Yes! Great reading!","Exactly right!","Super job!"][i%4]:"Yes! You found it."}</b><div><button class="btn go" id="next">${last?"See my stars":"Next question"}</button></div></div>`;
+      const n=document.getElementById("next");n.focus();
+      n.onclick=()=>last?finish({id,title:s.title,firsts:[...firsts,got],again:()=>read(id),unit:s.unit?unitOf(s.unit):null,skills:s.qs.map(q=>q.s)}):quiz(id,i+1,[...firsts,got]);
+    }else{
+      tried=true;btn.classList.add("wrong","shake");btn.disabled=true;
+      fb.innerHTML=`<div class="feedback hint"><b>Not quite. Try again!</b><span>${esc(q.h)}</span>
+        <div><button class="btn" id="peek">Look back at the story</button></div><div id="peekbox"></div></div>`;
+      document.getElementById("peek").onclick=e=>{
+        const box=document.getElementById("peekbox");
+        if(box.innerHTML){box.innerHTML="";e.target.textContent="Look back at the story";return}
+        box.innerHTML=`<div class="peek">${s.text.map(p=>`<p>${esc(p)}</p>`).join("")}</div>`;
+        e.target.textContent="Hide the story";
+      };
+    }
+  });
+}
+
+/* ---- Result ---- */
+function finish({id,title,firsts,again,unit,skills}){
+  const total=firsts.length,right=firsts.filter(Boolean).length,stars=starsFor(right,total);
+  const unitsBefore=UNITS.map(u=>unitOpen(u.n)),shelfBefore=LEVELS.map(L=>shelfOpen(L.n));
+  const prev=S.best[id]||{stars:0,score:0,tries:0};
+  const badgesBefore=new Set(badgeList().filter(b=>b.got).map(b=>b.n));
+  const newBest=Math.max(prev.stars,stars);
+  const gained=newBest-prev.stars;
+  const now=new Date(),today=localIso(now);
+  S.best[id]={stars:newBest,score:Math.max(prev.score||0,right),total,tries:(prev.tries||0)+1,last:today};
+  S.history.push({d:today,t:now.toLocaleTimeString("en",{hour:"numeric",minute:"2-digit"}),ts:now.getTime(),id,right,total,stars});
+  if(S.history.length>300)S.history=S.history.slice(-300);
+  if(!S.days.includes(today))S.days.push(today);
+  if(skills)skills.forEach((sk,k)=>{const a=S.skills[sk]||(S.skills[sk]=[0,0]);a[1]++;if(firsts[k])a[0]++});
+  save();
+  const newBadges=badgeList().filter(b=>b.got&&!badgesBefore.has(b.n));
+  const newUnits=UNITS.filter((u,k)=>!unitsBefore[k]&&unitOpen(u.n));
+  const newShelf=LEVELS.filter((L,k)=>!shelfBefore[k]&&shelfOpen(L.n));
+  const msg=stars===3?"Every one right on the first try!":stars===2?"Great work! You were so close.":"You finished! Practice makes it stronger.";
+  const gainLine=gained>0?`<div class="gain">${BLOSSOM_ICON}<span>+${gained} new blossom${gained>1?"s":""} on your tree!</span></div>`
+    :`<div class="gain">${BLOSSOM_ICON}<span>Your best here is ${prev.stars} star${prev.stars>1?"s":""}, so no new blossoms this time.</span></div>`;
+  const nextGoal=newBest<3?`<p class="tip">To grow your 3rd blossom here, try again and get all ${total} right on the first try.</p>`:"";
+  const key=`<div class="keyrow" aria-label="How stars work">
+      ${starsRow(3)}<span class="${stars===3?"me":""}">All ${total} right on the first try</span>
+      ${starsRow(2)}<span class="${stars===2?"me":""}">${Math.ceil(total*2/3)} or more right on the first try</span>
+      ${starsRow(1)}<span class="${stars===1?"me":""}">You finished!</span></div>`;
+  go(`<section class="page result">
+      <h2>${esc(title)}</h2>
+      <div class="bigstars">${[0,1,2].map(k=>starSvg(k<stars,k<stars?"pop":"",`animation-delay:${k*.25}s`)).join("")}</div>
+      <p class="q">${msg}</p>
+      <p class="tip">${right} of ${total} right on the first try = ${stars} star${stars>1?"s":""}</p>
+      ${gainLine}${nextGoal}${key}
+      ${newBadges.map(b=>`<div class="gain pop">${badgeIcon(b)}<span>New badge: ${esc(b.n)}!</span></div>`).join("")}
+      ${newUnits.map(u=>`<div class="unlock">Unit ${u.n} is open: ${esc(u.title)}!</div>`).join("")}
+      ${newShelf.map(L=>`<div class="unlock">Story Shelf Level ${L.n}, ${L.name}, is open!</div>`).join("")}
+      <div class="row"><button class="btn" id="again">Try again</button><button class="btn go" id="tree">Grow my tree</button></div>
+    </section>`);
+  document.getElementById("again").onclick=again;
+  document.getElementById("tree").onclick=home;
+  if(canSpeak)say(msg,0.9);
+}
+
+/* ---- Badges: shown on her home screen, announced on the result screen ---- */
+function calcStreak(){
+  if(!S.days.length)return 0;
+  const set=new Set(S.days),d=new Date();
+  if(!set.has(localIso(d))){d.setDate(d.getDate()-1);if(!set.has(localIso(d)))return 0}
+  let n=0;while(set.has(localIso(d))){n++;d.setDate(d.getDate()-1)}
+  return n;
+}
+function badgeList(){
+  const total=totalStars(),streak=calcStreak();
+  return [
+   {n:"First Sprout",how:"Finish your first game or story",got:Object.keys(S.best).length>=1,ic:"leaf"},
+   {n:"Little Blossom",how:"Grow 10 blossoms",got:total>=10,ic:"blossom"},
+   {n:"Blooming Bright",how:"Grow 25 blossoms",got:total>=25,ic:"blossom"},
+   {n:"Mighty Myrtle",how:"Grow 50 blossoms",got:total>=50,ic:"tree"},
+   {n:"Full Bloom",how:"Grow all "+MAXSTARS+" blossoms",got:total>=MAXSTARS,ic:"tree"},
+   {n:"Star Reader",how:"3 stars on any story",got:ALLSTORIES.some(s=>starsOf(s.id)===3),ic:"star"},
+   {n:"Bookworm",how:"3 stars on 3 stories",got:ALLSTORIES.filter(s=>starsOf(s.id)===3).length>=3,ic:"book"},
+   {n:"Unit Champion",how:"Every star in one unit",got:UNITS.some(u=>unitStars(u)===unitMax(u)),ic:"medal"},
+   {n:"Super Speller",how:"3 stars on a Spell It game",got:UNITS.some(u=>starsOf(`u${u.n}-spell`)===3),ic:"medal"},
+   {n:"Sound Detective",how:"3 stars on a Trick Words game",got:UNITS.some(u=>starsOf(`u${u.n}-trick`)===3),ic:"medal"},
+   {n:"Sharp Ears",how:"3 stars on the Vowel warm-up",got:starsOf("u2-vowel")===3,ic:"sun"},
+   {n:"Three in a Row",how:"Practice 3 days in a row",got:streak>=3,ic:"sun"},
+   {n:"Week of Wonder",how:"Practice 7 days in a row",got:streak>=7,ic:"sun"}];
+}
+const badgeIcon=b=>b.ic==="star"?starSvg(true):b.ic==="blossom"?BLOSSOM_ICON:ICON[b.ic];
+const badgeGrid=()=>badgeList().map(b=>`<div class="badge ${b.got?"on":"off"}"><span class="med">${b.got?badgeIcon(b):ICON.lock}</span><b>${esc(b.n)}</b><small>${esc(b.how)}</small></div>`).join("");
+const nameOf=id=>{const st=byId(id);if(st)return st.title;
+  const m=/^u(\d+)-(\w+)$/.exec(id);
+  if(m){const names={spell:"Spell It",trick:"Trick Words",vowel:"Vowel Warm-up"};return `Unit ${m[1]}: ${names[m[2]]||m[2]}`}
+  return id};
+
+/* ---- Grown-up gate: a 4-digit PIN, set on the first visit and asked for on every visit ---- */
+function gate(resetPin){
+  if(parentOk&&!resetPin)return admin();
+  const setting=resetPin||!getPin();
+  let first=null;
+  const draw=(title,hint)=>{
+    go(`<div class="bar">${backBtn()}<span class="tip">For grown-ups</span></div>
+      <section class="page result">
+        <span class="bigsay" aria-hidden="true">${ICON.lock}</span>
+        <h2>${title}</h2>
+        ${hint?`<p class="lead">${hint}</p>`:""}
+        <input class="pin" id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" aria-label="4-digit PIN">
+        <div id="fb"></div>
+        <button class="btn go" id="pinok">${setting?"Save PIN":"Open the log"}</button>
+        ${!setting?`<button class="linkbtn" id="forgot">Forgot your PIN?</button>`
+          :!resetPin?`<button class="linkbtn" id="connect">Already set up on her device? Connect this phone with your family code</button>`:""}
+      </section>`);
+    document.getElementById("back").onclick=home;
+    const fg=document.getElementById("forgot");if(fg)fg.onclick=forgotScreen;
+    const cn=document.getElementById("connect");if(cn)cn.onclick=connectScreen;
+    const inp=document.getElementById("pin");inp.focus();
+    const flash=t=>{document.getElementById("fb").innerHTML=`<div class="feedback hint"><b>${t}</b></div>`;inp.value="";inp.classList.add("shake");setTimeout(()=>inp.classList.remove("shake"),400);inp.focus()};
+    const submit=()=>{
+      const v=inp.value;
+      if(!/^\d{4}$/.test(v)){flash("Please type 4 numbers.");return}
+      if(setting){
+        if(first===null){first=v;draw("Type it once more","Just to make sure it's right.");return}
+        if(v!==first){first=null;draw("Set a grown-up PIN","Those didn't match. Let's start again.");return}
+        setPin(v);schedulePush();parentOk=true;
+        if(getCode())admin();else codeScreen();return;
+      }
+      if(hashPin(v)===getPin()){parentOk=true;admin()}else flash("That's not the PIN.");
+    };
+    document.getElementById("pinok").onclick=submit;
+    inp.onkeydown=e=>{if(e.key==="Enter")submit()};
+  };
+  draw(setting?"Set a grown-up PIN":"Enter your PIN",setting?"Pick 4 numbers only you know. You'll need them to see the lesson log.":"");
+}
+/* Small text-entry screens that share one layout: choose / connect / forgot */
+function codeForm({title,lead,button,placeholder,onSubmit}){
+  go(`<div class="bar">${backBtn()}<span class="tip">For grown-ups</span></div>
+    <section class="page result">
+      <span class="bigsay" aria-hidden="true">${ICON.lock}</span>
+      <h2>${title}</h2>
+      <p class="lead">${lead}</p>
+      <input class="pin code" id="code" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-label="Family code" placeholder="${esc(placeholder||"family code")}">
+      <div id="fb"></div>
+      <button class="btn go" id="ok">${button}</button>
+    </section>`);
+  document.getElementById("back").onclick=home;
+  const inp=document.getElementById("code"),fb=document.getElementById("fb");inp.focus();
+  const show=(b,s)=>{fb.innerHTML=`<div class="feedback hint"><b>${b}</b>${s?`<span>${s}</span>`:""}</div>`};
+  const submit=()=>onSubmit(normCode(inp.value),show,fb);
+  document.getElementById("ok").onclick=submit;inp.onkeydown=e=>{if(e.key==="Enter")submit()};
+}
+function codeScreen(){
+  codeForm({title:"Choose a family code",button:"Save family code",placeholder:"for example: myrtle tree 7",
+    lead:"A word or short phrase only grown-ups know, at least 6 letters. It lets you see her lessons from your own phone, and it resets the PIN if you ever forget it. Write it down somewhere safe.",
+    onSubmit:(c,show)=>{if(c.length<6){show("Make it at least 6 letters.");return}setCode(c);sync={status:"idle",at:0,msg:""};schedulePush();admin()}});
+}
+function connectScreen(){
+  codeForm({title:"Connect with your family code",button:"Connect",
+    lead:"Type the family code you chose on her device, and her lessons will show up here on this phone.",
+    onSubmit:async(c,show,fb)=>{
+      if(c.length<6){show("The family code is at least 6 letters.");return}
+      if(!canSync){show("Connecting needs the website.","Open the app's web address instead of the file.");return}
+      fb.innerHTML=`<p class="tip">Connecting…</p>`;
+      const prev=getCode();setCode(c);
+      const res=await pull();
+      if(res==="error"){setCode(prev);show("Couldn't connect.",esc(sync.msg));return}
+      if(res==="none"){setCode(prev);show("No progress found for that family code.","Check the spelling, or set the code on her device first: For grown-ups → Set a PIN → Choose a family code.");return}
+      parentOk=true;admin(true);
+    }});
+}
+function forgotScreen(){
+  const code=getCode();
+  if(!code){go(`<div class="bar">${backBtn()}<span class="tip">For grown-ups</span></div>
+    <section class="page result"><span class="bigsay" aria-hidden="true">${ICON.lock}</span><h2>Forgot your PIN?</h2>
+    <p class="lead">No family code was set on this device, so the PIN can't be reset here. The grown-up who set it can change it from inside the log (All activities and settings → Change PIN).</p></section>`);
+    document.getElementById("back").onclick=home;return}
+  codeForm({title:"Forgot your PIN?",button:"Continue",lead:"Type your family code to choose a new PIN.",
+    onSubmit:(c,show)=>{if(c===code)gate(true);else show("That's not the family code.")}});
+}
+
+/* ---- Lesson Log: for grown-ups only, behind the PIN ---- */
+function admin(noPull,keepScroll){
+  const keepDetails=!!app.querySelector("details.grown[open]");
+  if(!noPull&&canSync&&getCode())pull().then(()=>{if(view==="admin")admin(true,true)});
+  const now=new Date(),today=localIso(now),day0=d=>new Date(d+"T00:00");
+  const todays=S.history.filter(h=>h.d===today);
+  const lastDay=S.days.length?S.days[S.days.length-1]:Object.values(S.best).map(b=>b.last).filter(Boolean).sort().pop();
+  const ago=lastDay?Math.round((day0(today)-day0(lastDay))/864e5):null;
+  const niceDate=now.toLocaleDateString("en",{weekday:"long",month:"long",day:"numeric"});
+  const code=getCode();
+  const approveLine=canSync&&code?`<p>When you see the lessons you asked for, approve her Screen Time request on this phone. You don't need her iPad.</p>`:"";
+  const todayCard=todays.length
+    ?`<section class="page today yes" id="today" style="gap:8px"><span class="eyebrow">Today · ${niceDate}</span><h2>✓ ${todays.length} lesson${todays.length>1?"s":""} done</h2>
+       <ul>${todays.map(h=>`<li>${esc(nameOf(h.id))} — ${h.right} of ${h.total}${h.t?", "+h.t:""}</li>`).join("")}</ul>${approveLine}</section>`
+    :`<section class="page today no" id="today" style="gap:8px"><span class="eyebrow">Today · ${niceDate}</span><h2>No lessons done yet today</h2>
+       <p>${lastDay?ago===0?"She finished something today, but before the lesson log was switched on.":`Last finished lesson: ${lastDay}${ago===1?" (yesterday)":ago>1?` (${ago} days ago)`:""}.`:"Nothing finished yet — the log starts with her first game or story."}</p>${approveLine}</section>`;
+  const week=S.history.filter(h=>(day0(today)-day0(h.d))/864e5<7).length;
+  const streak=calcStreak(),total=totalStars();
+  const perfects=Object.values(S.best).filter(b=>b.stars===3).length;
+  const nexts=[];
+  const nu=UNITS.find(u=>!unitOpen(u.n));
+  if(nu){const need=Math.max(0,UNLOCK_AT-unitStars(unitOf(nu.n-1)));
+    nexts.push(need>0?`Earn ${need} more star${need>1?"s":""} in Unit ${nu.n-1} to open Unit ${nu.n}: ${esc(nu.title)}.`:`Unit ${nu.n} is ready to explore!`)}
+  const sl=LEVELS.find(L=>!shelfOpen(L.n));
+  if(sl){const need=Math.max(0,2-shelfPassed(sl.n-1));
+    nexts.push(need>0?`Pass ${need} more ${LEVELS[sl.n-2].name} shelf story to open Story Shelf Level ${sl.n}.`:`Shelf Level ${sl.n} is ready to explore!`)}
+  if(!nexts.length)nexts.push("Every unit and shelf level is open — amazing work!");
+  const skillRows=Object.keys(SKILL).map(k=>{const a=S.skills[k]||[0,0];const pct=a[1]?Math.round(100*a[0]/a[1]):null;
+    return `<div class="barrow"><span>${SKILL[k]}</span><span class="pct">${pct==null?"not tried yet":pct+"% first try"}</span><div class="track"><div class="fill" style="width:${pct||0}%"></div></div></div>`}).join("");
+  const unitRows=UNITS.map(u=>{const open=unitOpen(u.n),st=unitStars(u);
+    return `<div class="barrow"><span>Unit ${u.n} · ${esc(u.title)}</span><span class="pct">${open?st+" / "+unitMax(u):"locked"}</span><div class="track"><div class="fill" style="width:${Math.round(100*st/unitMax(u))}%"></div></div></div>`}).join("");
+  const wordList=Object.entries(S.words).sort((a,b)=>b[1]-a[1]).slice(0,14);
+  const wordsHtml=wordList.length
+    ?`<div class="chips">${wordList.map(([w,c])=>`<button class="chipword" data-w="${esc(w)}">${esc(w)}<i>×${c}</i></button>`).join("")}</div><p class="tip">Words she missed on the first try. Tap one to hear it — great ones to practice together.</p>`
+    :`<p class="tip">No tricky words collected yet. Words show up here when a spelling or trick-word game needs a second try.</p>`;
+  const dayCells=[...Array(14)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-(13-i));
+    const on=S.days.includes(localIso(d));
+    return `<div class="day ${on?"on":""}" title="${localIso(d)}">${on?starSvg(true,"","width:15px;height:15px"):d.toLocaleDateString("en",{weekday:"narrow"})}</div>`}).join("");
+  const histRows=[...S.history].reverse().slice(0,20).map(h=>`<tr><td>${h.d}</td><td>${h.t||"–"}</td><td>${esc(nameOf(h.id))}</td><td>${h.right}/${h.total}</td><td>${starsRow(h.stars)}</td></tr>`).join("");
+  const row=(lbl,name,id)=>{const b=S.best[id];return `<tr><td>${lbl}</td><td>${esc(name)}</td><td>${b?(b.score+"/"+(b.total||4)):"–"}</td><td>${b?b.stars:0}</td><td>${b?b.tries:0}</td><td>${b?b.last:"–"}</td></tr>`};
+  const rows=[...UNITS.flatMap(u=>[...(u.vowels?[row(`U${u.n}`,"Vowel sounds",`u${u.n}-vowel`)]:[]),row(`U${u.n}`,"Spell it",`u${u.n}-spell`),row(`U${u.n}`,"Trick words",`u${u.n}-trick`),...u.stories.map(s=>row(`U${u.n}`,s.title,s.id))]),...SHELF.map(s=>row(`Shelf ${s.level}`,s.title,s.id))].join("");
+  const homeScreen=`<p>On her iPad, tap Share, then <b>Add to Home Screen</b>, and open Reading Tree from that icon. It opens full screen with no address bar, so Guided Access can't reach another website. If the icon was added before today, delete it and add it again.</p>`;
+  const syncLine=()=>{
+    if(!code)return "";
+    if(!canSync)return `<p class="tip">Sync starts working once the app is on its website. The family code still resets the PIN.</p>`;
+    const t=sync.at?new Date(sync.at).toLocaleTimeString("en",{hour:"numeric",minute:"2-digit"}):"";
+    return `<p class="tip">${sync.status==="busy"?"Checking for updates…":sync.status==="error"?"Sync problem: "+esc(sync.msg):sync.status==="ok"?"Synced · updated "+t:"Sync is on."}</p>`;
+  };
+  const syncSection=code
+    ?`<section class="page" style="gap:10px"><h3>See her lessons from your phone</h3>
+       <p>Family code: <b>${esc(code)}</b></p>${syncLine()}
+       ${homeScreen}
+       ${canSync?`<p class="tip">On your phone, open <b>${esc(location.origin)}</b>, tap <b>For grown-ups</b>, then <b>Connect this phone with your family code</b>. Her finished lessons show up here, including <b>✓ 2 lessons done</b>, and you can approve Screen Time without her iPad.</p>`:""}
+       <div class="row" style="justify-content:flex-start">${canSync?`<button class="btn" id="syncNow">Sync now</button>`:""}<button class="btn" id="changeCode">Change family code</button></div></section>`
+    :`<section class="page" style="gap:10px"><h3>See her lessons from your phone</h3>
+       <p class="tip">Choose a family code and this log will show up on any phone where you type the same code. It also resets the PIN if you forget it.</p>
+       ${homeScreen}
+       <div class="row" style="justify-content:flex-start"><button class="btn" id="changeCode">Choose a family code</button></div></section>`;
+  go(`<div class="bar"><button class="btn" id="back">${ICON.lock} Lock and go home</button><span class="tip">For grown-ups · Lesson Log</span></div>
+    ${todayCard}
+    <div class="stats">
+      <div class="stat">${ICON.book}<span class="big">${week}</span><span>lesson${week===1?"":"s"} this week</span></div>
+      <div class="stat">${ICON.sun}<span class="big">${streak}</span><span>day${streak===1?"":"s"} in a row</span></div>
+      <div class="stat">${starSvg(true)}<span class="big">${perfects}</span><span>perfect games</span></div>
+      <div class="stat">${ICON.tree}<span class="big">${total}</span><span>of ${MAXSTARS} blossoms</span></div>
+    </div>
+    ${code&&canSync?syncLine():""}
+    <section class="page" style="gap:10px"><h3>Last two weeks</h3><div class="dayrow">${dayCells}</div><p class="tip">A star on every day with at least one finished game or story.</p></section>
+    <section class="page" style="gap:10px"><h3>Lesson log</h3>${S.history.length
+      ?`<div class="tablewrap"><table><thead><tr><th>Date</th><th>Time</th><th>Lesson</th><th>Score</th><th>Stars</th></tr></thead><tbody>${histRows}</tbody></table></div><p class="tip">Her last ${Math.min(20,S.history.length)} finished games and stories, newest first.</p>`
+      :`<p class="tip">Every finished game or story will show up here with its date, time and score.</p>`}</section>
+    <section class="page" style="gap:12px"><h3>Unit progress</h3>${unitRows}<p class="tip">${nexts.join(" ")}</p></section>
+    <section class="page" style="gap:12px"><h3>Comprehension skills</h3><p class="tip">First-try correct on story quiz questions, all stories combined.</p>${skillRows}</section>
+    <section class="page" style="gap:10px"><h3>Words to practice</h3>${wordsHtml}</section>
+    ${syncSection}
+    <details class="grown"><summary>All activities and settings</summary><div class="gbody">
+      <div class="tablewrap"><table><thead><tr><th>Where</th><th>Activity</th><th>Best</th><th>Stars</th><th>Tries</th><th>Last</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="small">Stars: all right on the first try = 3, two-thirds or more = 2, finishing = 1. Only the best result counts, and every star is one blossom, so a retry can only add blossoms. The Sound Units follow the Fundations Level 2 order, so practice matches class.</p>
+      <div class="row" style="justify-content:flex-start">
+        <button class="btn" id="unlockAll">${S.unlockAll?"Use normal unlocking":"Open all units and levels"}</button>
+        <button class="btn" id="changePin">Change PIN</button>
+        <button class="btn danger" id="reset">Start over</button>
+      </div><div id="confirm"></div></div></details>`, !!keepScroll);
+  view="admin";
+  if(keepDetails){const d=app.querySelector("details.grown");if(d)d.open=true}
+  if(canSync&&code)adminPoll=setInterval(async()=>{
+    if(view!=="admin"||pushing||document.hidden)return;
+    const box=document.getElementById("confirm");
+    if(box&&box.innerHTML)return;
+    const r=await pull();
+    if(r==="changed"&&view==="admin")admin(true,true);
+  },15000);
+  document.getElementById("back").onclick=home;
+  app.querySelectorAll(".chipword").forEach(b=>b.onclick=()=>say(b.dataset.w,0.7));
+  document.getElementById("unlockAll").onclick=()=>{S.unlockAll=!S.unlockAll;S.settingsAt=Date.now();save();admin(true)};
+  document.getElementById("changePin").onclick=()=>gate(true);
+  document.getElementById("changeCode").onclick=codeScreen;
+  const sn=document.getElementById("syncNow");if(sn)sn.onclick=()=>{sync.status="busy";admin(true);push()};
+  document.getElementById("reset").onclick=()=>{
+    const c=document.getElementById("confirm");
+    c.innerHTML=`<div class="feedback hint"><b>Clear all stars, badges, blossoms and the lesson log${code&&canSync?" on every connected device":""}?</b><div class="row" style="justify-content:flex-start"><button class="btn danger" id="yes">Yes, start over</button><button class="btn" id="no">Keep progress</button></div></div>`;
+    document.getElementById("no").onclick=()=>c.innerHTML="";
+    document.getElementById("yes").onclick=()=>{S={best:{},done:{},unlockAll:false,history:[],days:[],skills:{},words:{},resetAt:Date.now(),settingsAt:0};save();lastStars=0;admin(true)};
+  };
+}
+
+/* Opening the page with #forgot on the end of the address lets a grown-up set a new PIN without losing any progress. */
+if(location.hash==="#forgot"){try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}gate(true)}else home();
+</script>
+</body>
+</html>
