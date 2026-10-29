@@ -159,7 +159,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid var(--blossom);outl
 .vblank{display:inline-block;min-width:.75em;border-bottom:6px solid var(--blossom);margin:0 .06em;color:var(--blossom-ink)}
 .opt .ab{font-family:var(--display);font-weight:800;color:var(--muted);flex:none;width:1.4em}
 .opt:hover:not(:disabled){border-color:var(--leaf)}
-.opt.right{background:var(--good-soft);border-color:var(--good)}
+.opt.right,.hid.right{background:var(--good-soft);border-color:var(--good);animation:pop .5s both}
 .opt.wrong{background:var(--try-soft);border-color:var(--try);opacity:.8}
 .opt:disabled{cursor:default}
 .feedback{border-radius:16px;padding:14px 16px;font-size:18px;display:flex;flex-direction:column;gap:8px}
@@ -236,12 +236,14 @@ th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute
 .rule svg{width:18px;height:18px;flex:none}
 
 .blossom{transform-box:fill-box;transform-origin:center}
-.blossom.new{animation:bloom .8s both}
-@keyframes bloom{0%{transform:scale(.2);opacity:0}60%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
-.crown.sway{transform-box:view-box;transform-origin:160px 150px;animation:sway 1.3s ease}
-@keyframes sway{30%{transform:rotate(-2deg)}70%{transform:rotate(2deg)}}
-.spark{animation:rise .9s ease-out both}
-@keyframes rise{from{transform:translate(155px,200px)}to{transform:translate(155px,36px);opacity:0}}
+.blossom.new{animation:bloom 1.15s both}
+@keyframes bloom{0%{transform:scale(.15);opacity:0}45%{transform:scale(2.4)}100%{transform:scale(1);opacity:1}}
+.crown.sway{transform-box:view-box;transform-origin:160px 150px;animation:sway 1.6s ease}
+@keyframes sway{20%{transform:rotate(-3.5deg)}55%{transform:rotate(3.5deg)}100%{transform:rotate(0)}}
+.spark{animation:rise 1.3s ease-out both}
+@keyframes rise{from{transform:translate(155px,200px) scale(1)}to{transform:translate(155px,28px) scale(.4);opacity:0}}
+.bloomnote{display:flex;align-items:center;gap:12px;background:var(--blossom-soft);border:3px solid var(--blossom);border-radius:18px;padding:14px 16px;font-family:var(--display);font-size:22px;font-weight:800}
+.bloomnote svg{width:52px;height:52px;flex:none}
 .visitor.new{animation:pop .7s both}
 .sound{min-height:92px;transition:transform .15s}
 .sound:active,.tapbox:active,.opt:active,.step:active,.card:active,.btn:active{transform:scale(.97)}
@@ -255,6 +257,9 @@ th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute
 .slot,.tile{min-width:52px;min-height:64px;border-radius:14px;border:3px solid var(--line);background:var(--bg);font-family:var(--display);font-weight:800;font-size:32px;display:flex;align-items:center;justify-content:center;touch-action:none}
 .slot{border-style:dashed}
 .slot.filled{border-style:solid;border-color:var(--leaf);background:var(--good-soft)}
+.slot.just{animation:slotpop .55s both}
+@keyframes slotpop{0%{transform:scale(.45)}50%{transform:scale(1.22);box-shadow:0 0 0 8px var(--sun-soft)}100%{transform:scale(1);box-shadow:0 0 0 0 var(--sun-soft)}}
+.slotrow.glowwin .slot{animation:slotpop .7s both}
 .tile{cursor:grab;background:var(--paper)}
 .tile.dragging{position:relative;z-index:3;cursor:grabbing}
 .seek{position:relative;min-height:220px;border-radius:18px;overflow:hidden;background:linear-gradient(#d7ebe3,#f4efe4)}
@@ -262,16 +267,19 @@ th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute
 .hid{position:absolute;min-height:48px;border:2px solid var(--line);background:var(--paper);border-radius:999px;padding:8px 12px;font-weight:800}
 .hid.right,.tile.right{background:var(--good-soft);border-color:var(--good)}
 .hid.wrong,.tile.wrong{background:var(--try-soft);border-color:var(--try)}
-.storyscene{width:100%;max-height:200px;border-radius:16px;background:var(--soft)}
+.storyscene{width:100%;max-height:240px;border-radius:16px;background:var(--soft)}
 .story p.on{background:var(--sun-soft);border-radius:8px}
-.confetti{position:relative;height:0}
-.confetti i{position:absolute;left:50%;top:0;width:10px;height:14px;border-radius:8px;background:var(--blossom);animation:fall 1s ease-in both}
-@keyframes fall{to{transform:translate(var(--x),90px) rotate(40deg);opacity:0}}
-.flywrap{position:relative;display:flex;align-items:center;justify-content:center;gap:18px;min-height:120px}
-.flystar{animation:flystar .9s ease-in both}
-@keyframes flystar{to{transform:translate(70px,10px) scale(.4)}}
-.minitree{width:120px}
-.minitree svg{width:120px;height:auto}
+.confetti{position:relative;height:78px;pointer-events:none}
+.confetti i{position:absolute;left:50%;top:8px;width:14px;height:18px;border-radius:10px;background:var(--blossom);animation:fall 1.35s ease-in both}
+@keyframes fall{to{transform:translate(var(--x),120px) rotate(70deg);opacity:0}}
+.flywrap{position:relative;width:min(100%,240px);height:190px;margin:0 auto}
+.minitree,.minitree svg{width:100%;height:auto}
+.minitree.land{animation:treepulse .7s 1s both}
+@keyframes treepulse{40%{transform:scale(1.08)}}
+.flystar{position:absolute;left:0;top:78px}
+.flystar .star{width:76px;height:76px;filter:drop-shadow(0 0 10px #efb12a)}
+.flystar.go{animation:flystar 1.35s cubic-bezier(.2,.7,.2,1) both}
+@keyframes flystar{0%{transform:translate(-8px,24px) scale(1.15)}100%{transform:translate(86px,-58px) scale(.22);opacity:.2}}
 .buddy{display:flex;gap:10px;align-items:center;background:var(--sun-soft);border-radius:16px;padding:10px 12px}
 .buddy svg{width:42px;height:42px;flex:none}
 .picker{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
@@ -559,7 +567,7 @@ const pinRec=()=>{try{const v=localStorage.getItem(PINKEY);if(!v)return null;ret
 const getPin=()=>{const r=pinRec();return r?r.h:null};
 const storePin=(h,at)=>{try{localStorage.setItem(PINKEY,JSON.stringify({h,at}))}catch(e){}};
 const setPin=p=>storePin(hashPin(p),Date.now());
-let parentOk=false;
+let parentOk=false,openName=false;
 /* The family code connects devices (and resets a forgotten PIN). Not case-sensitive. */
 const CODEKEY="hadassah-reading-tree-code";
 const normCode=c=>String(c||"").trim().toLowerCase().replace(/\s+/g," ");
@@ -696,9 +704,10 @@ function tone(freq,dur,type,delay,gain){
   }catch(e){}
 }
 function chime(kind){
-  if(kind==="bloom"){tone(523,.18,"sine",0,.07);tone(659,.22,"sine",.08,.06);tone(784,.3,"sine",.16,.05)}
-  else if(kind==="whoosh"){tone(320,.1,"triangle",0,.05);tone(540,.16,"sine",.05,.04)}
+  if(kind==="bloom"){tone(523,.22,"sine",0,.14);tone(659,.26,"sine",.12,.12);tone(784,.34,"sine",.24,.1);tone(1046,.42,"sine",.36,.08)}
+  else if(kind==="whoosh"){tone(320,.12,"triangle",0,.08);tone(540,.2,"sine",.08,.07)}
   else if(kind==="click")tone(880,.05,"triangle",0,.05);
+  else if(kind==="snap"){tone(660,.08,"sine",0,.1);tone(990,.14,"sine",.07,.08)}
   else if(kind==="rustle"){tone(196,.12,"triangle",0,.04);tone(262,.14,"sine",.06,.03)}
   else if(kind==="tap")tone(698,.06,"sine",0,.04);
 }
@@ -749,7 +758,7 @@ function treeSvg(count,fresh){
   const fly=count>=10?`<g class="visitor ${miles.includes(10)?"":"new"}" transform="translate(70,58)"><ellipse cx="-7" cy="0" rx="7" ry="9" fill="#e0648c"/><ellipse cx="7" cy="0" rx="7" ry="9" fill="#efb12a"/><rect x="-1.2" y="-7" width="2.4" height="16" rx="1" fill="#1d2a23"/></g>`:"";
   const bow=count>=15?`<g class="visitor ${miles.includes(15)?"":"new"}"><path d="M78 148 A82 70 0 0 1 242 148" fill="none" stroke="#e0648c" stroke-width="4"/><path d="M88 148 A72 60 0 0 1 232 148" fill="none" stroke="#efb12a" stroke-width="4"/><path d="M98 148 A62 50 0 0 1 222 148" fill="none" stroke="#5f9e78" stroke-width="4"/></g>`:"";
   const swing=S.decor&&S.decor.swing?`<path d="M146 108 L132 156 M154 108 L168 156" stroke="#7b5a43" stroke-width="2"/><rect x="126" y="154" width="48" height="7" rx="3" fill="#7b5a43"/>`:"";
-  const spark=fresh>0?`<circle class="spark" r="5" fill="${bloom==="var(--blossom)"?"var(--sun)":bloom}"/>`:"";
+  const spark=fresh>0?`<circle class="spark" r="9" fill="${bloom==="var(--blossom)"?"var(--sun)":bloom}"/>`:"";
   return `<svg viewBox="0 0 320 222" role="img" aria-label="Myrtle tree with ${count} blossoms">
     <g class="${fresh>0?"crown sway":""}">
     <path d="M150 220 C152 180 150 160 156 128 L164 128 C170 160 168 180 172 220 Z" fill="var(--bark)"/>
@@ -823,6 +832,7 @@ function home(){
   go(`<header class="hero"><h1>${esc(treeTitle())}</h1>
       <p>${childName()==="Hadassah"?"Hadassah means <b>myrtle tree</b>. ":""}Practice your sounds, read the stories, and watch your tree bloom.</p></header>
     <div class="treecard">${treeSvg(total,fresh)}
+      ${fresh>0?`<div class="bloomnote pop">${BLOSSOM_ICON}<b>${fresh===1?"A new blossom opened!":fresh+" new blossoms opened!"}</b></div>`:""}
       <div class="tally"><span class="n">${total}</span> blossoms</div>
       <div class="buddy">${BUDDY}<span>${esc(buddy)}</span></div>
       <div class="rule">Every ${starSvg(true)} you earn grows 1 blossom.</div>
@@ -840,7 +850,7 @@ function home(){
     <p class="later">More units are on the way as you get there.</p>
     <section class="shelf"><div class="sectionhead"><span class="eyebrow">Bonus</span><h2>Story Shelf</h2><p>Longer stories with harder words. Tap any word to hear it, or have the story read to you.</p></div>${shelf}</section>
     <section class="page" style="gap:12px"><div class="sectionhead"><span class="eyebrow">Rewards</span><h2>My Badges</h2><p>${badgesGot} of ${badgeList().length} earned. Each one tells you how to get it.</p></div><div class="badgegrid">${badgeGrid()}</div></section>
-    <div class="center"><button class="linkbtn" id="grown">${ICON.lock} For grown-ups</button></div>`);
+    <div class="center"><button class="linkbtn" id="hername">Change her name</button><button class="linkbtn" id="grown">${ICON.lock} For grown-ups</button></div>`);
   view="home";
   app.querySelectorAll("[data-story]").forEach(b=>b.onclick=()=>read(b.dataset.story));
   app.querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>{
@@ -848,6 +858,7 @@ function home(){
     if(a==="vowels")vowels(u);else if(a==="cards")cards(u);else if(a==="tap")tapRead(u,0);else wordGame(u,a);
   });
   document.getElementById("grown").onclick=()=>gate();
+  document.getElementById("hername").onclick=()=>{openName=true;gate()};
   const water=document.getElementById("water");
   if(water)water.onclick=()=>{S.watered=localIso(new Date());save();chime("rustle");home()};
   document.getElementById("sound").onclick=()=>{setSoundOn(!soundOn());if(soundOn())chime("tap");home()};
@@ -926,7 +937,7 @@ function cards(u){
     <div class="center"><button class="btn" id="withme">Say it with me</button><button class="btn go" id="next">Next: Tap and read</button></div>`);
   S.done[`u${u.n}-cards`]=true;save();
   document.getElementById("back").onclick=home;
-  document.getElementById("next").onclick=()=>tapRead(u,0);
+  document.getElementById("next").onclick=()=>cheer("You learned the sounds!",()=>tapRead(u,0));
   let withI=0;
   document.getElementById("withme").onclick=()=>{
     const card=u.cards[withI%u.cards.length];
@@ -967,7 +978,7 @@ function tapRead(u,i){
     if(lit===parts.length){const whole=document.getElementById("whole");whole.classList.remove("dim");whole.classList.add("glow");chime("whoosh");hear.disabled=false;next.disabled=false;next.focus()}
   });
   hear.onclick=()=>say(word,0.7);
-  next.onclick=()=>{if(i<u.tap.length-1)tapRead(u,i+1);else{S.done[`u${u.n}-tap`]=true;save();wordGame(u,"spell")}};
+  next.onclick=()=>{if(i<u.tap.length-1)tapRead(u,i+1);else{S.done[`u${u.n}-tap`]=true;save();cheer("You tapped every sound!",()=>wordGame(u,"spell"))}};
 }
 
 /* ---- Steps 3 & 4: spell it / find the trick word ---- */
@@ -1006,10 +1017,10 @@ function spellTiles(u,i=0,firsts=[]){
     const ch=letters[btn.dataset.n];
     if(ch===letters[placed]){
       const slot=document.getElementById("slot"+placed);
-      slot.textContent=ch;slot.classList.add("filled");
+      slot.textContent=ch;slot.classList.remove("just");void slot.offsetWidth;slot.classList.add("filled","just");
       btn.disabled=true;btn.style.visibility="hidden";
-      chime("click");placed++;
-      if(placed===letters.length)win();
+      chime("snap");placed++;
+      if(placed===letters.length){document.getElementById("slots").classList.add("glowwin");win()}
     }else{
       if(!tried){S.words[target]=(S.words[target]||0)+1;save()}
       tried=true;btn.classList.add("wrong","shake");
@@ -1092,10 +1103,55 @@ const SCENES={
   library:{prompt:"Tap the book!",ok:"book",bits:["book","shark","desk"]},
   daniel:{prompt:"Tap the lion!",ok:"lion",bits:["lion","window","den"]}
 };
+const GLYPH={
+ fish:'<ellipse cx="28" cy="24" rx="14" ry="8" fill="#e07a5f"/><polygon points="12,24 2,15 2,33" fill="#c45c45"/><circle cx="36" cy="22" r="1.7" fill="#1d2a23"/>',
+ ship:'<path d="M4 28h40l-7 12H11z" fill="#7b5a43"/><path d="M24 6v22" stroke="#5c4030" stroke-width="2"/><path d="M24 8l16 16H24z" fill="#f7f1e4"/>',
+ gull:'<path d="M4 26c8-10 14-8 20 0" fill="none" stroke="#3d63b8" stroke-width="3" stroke-linecap="round"/><path d="M24 26c6-10 12-8 20 0" fill="none" stroke="#3d63b8" stroke-width="3" stroke-linecap="round"/><circle cx="30" cy="28" r="2" fill="#efb12a"/>',
+ wind:'<path d="M6 16h22c6 0 6 8 0 8H14" fill="none" stroke="#3d63b8" stroke-width="3" stroke-linecap="round"/><path d="M8 28h26c6 0 6 8 0 8H16" fill="none" stroke="#5f9e78" stroke-width="3" stroke-linecap="round"/>',
+ lake:'<ellipse cx="24" cy="28" rx="18" ry="8" fill="#7eb6d6"/><path d="M12 28h6M22 24h8M30 30h6" stroke="#f7f1e4" stroke-width="2" stroke-linecap="round"/>',
+ dog:'<ellipse cx="22" cy="30" rx="14" ry="8" fill="#c4922a"/><circle cx="34" cy="20" r="7" fill="#c4922a"/><ellipse cx="28" cy="14" rx="3" ry="5" fill="#a87820"/><circle cx="36" cy="19" r="1.2" fill="#1d2a23"/>',
+ skunk:'<ellipse cx="22" cy="30" rx="14" ry="8" fill="#2c3330"/><path d="M16 26h12" stroke="#f7f1e4" stroke-width="3"/><circle cx="34" cy="18" r="7" fill="#2c3330"/><path d="M30 12l4 6" stroke="#f7f1e4" stroke-width="2"/>',
+ hill:'<path d="M4 40 L24 12 L44 40z" fill="#5f9e78"/>',
+ sling:'<path d="M16 8l8 28 8-28" fill="none" stroke="#7b5a43" stroke-width="3" stroke-linecap="round"/><ellipse cx="24" cy="36" rx="6" ry="3" fill="#c4922a"/>',
+ rock:'<path d="M10 32l6-16 10-4 12 8 2 14-8 6H16z" fill="#8d8478"/>',
+ giant:'<circle cx="24" cy="12" r="8" fill="#e0b089"/><rect x="14" y="22" width="20" height="18" rx="4" fill="#3d63b8"/>',
+ stick:'<path d="M10 40 L36 8" stroke="#7b5a43" stroke-width="4" stroke-linecap="round"/>',
+ man:'<circle cx="24" cy="12" r="7" fill="#e0b089"/><path d="M14 40 V24 h20 v16" fill="#5f9e78"/><path d="M8 28h10M30 28h10" stroke="#5f9e78" stroke-width="3" stroke-linecap="round"/>',
+ colt:'<ellipse cx="22" cy="28" rx="14" ry="8" fill="#c4922a"/><path d="M32 22c6-8 12-6 12 2" fill="#c4922a"/><path d="M14 34v8M22 34v8M30 34v8" stroke="#7b5a43" stroke-width="2"/>',
+ inn:'<path d="M6 22 L24 8 L42 22 V40 H6z" fill="#e07a5f"/><rect x="20" y="26" width="8" height="14" fill="#7b5a43"/>',
+ kids:'<circle cx="16" cy="16" r="6" fill="#e0b089"/><circle cx="32" cy="18" r="5" fill="#e0b089"/><path d="M8 40 V26 h16 v14M24 40 V28 h14 v12" fill="#3d63b8"/>',
+ grass:'<path d="M12 40c0-16 2-16 4 0M22 40c0-20 2-20 4 0M32 40c0-14 2-14 4 0" fill="none" stroke="#2e6a4e" stroke-width="3" stroke-linecap="round"/>',
+ cup:'<path d="M12 14h20l-3 20H15z" fill="#f7f1e4" stroke="#7b5a43" stroke-width="2"/><path d="M32 18h6a6 6 0 010 12h-6" fill="none" stroke="#7b5a43" stroke-width="2"/>',
+ ark:'<path d="M4 26h40l-6 14H10z" fill="#7b5a43"/><rect x="14" y="12" width="20" height="14" rx="2" fill="#c4922a"/>',
+ animals:'<circle cx="16" cy="20" r="7" fill="#c4922a"/><circle cx="32" cy="24" r="8" fill="#e07a5f"/><circle cx="14" cy="18" r="1" fill="#1d2a23"/><circle cx="34" cy="22" r="1" fill="#1d2a23"/>',
+ rainbow:'<path d="M6 36a18 18 0 0136 0" fill="none" stroke="#e0648c" stroke-width="4"/><path d="M12 36a12 12 0 0124 0" fill="none" stroke="#efb12a" stroke-width="4"/><path d="M18 36a6 6 0 0112 0" fill="none" stroke="#5f9e78" stroke-width="4"/>',
+ puppy:'<ellipse cx="22" cy="30" rx="12" ry="7" fill="#e0b089"/><circle cx="32" cy="20" r="7" fill="#e0b089"/><ellipse cx="26" cy="12" rx="3" ry="6" fill="#c4922a"/><circle cx="34" cy="19" r="1.2" fill="#1d2a23"/>',
+ ball:'<circle cx="24" cy="24" r="14" fill="#e0648c"/><path d="M10 24h28M24 10c6 8 6 20 0 28M24 10c-6 8-6 20 0 28" fill="none" stroke="#f7f1e4" stroke-width="2"/>',
+ couch:'<path d="M6 22h36v12H6z" fill="#3d63b8"/><path d="M4 28h6v10H4zM38 28h6v10h-6z" fill="#2d4c90"/><rect x="10" y="18" width="28" height="8" rx="2" fill="#5f9e78"/>',
+ stones:'<circle cx="14" cy="28" r="7" fill="#8d8478"/><circle cx="26" cy="24" r="8" fill="#a89b8c"/><circle cx="36" cy="30" r="6" fill="#6f675e"/>',
+ rain:'<ellipse cx="20" cy="18" rx="12" ry="8" fill="#f7f1e4"/><ellipse cx="30" cy="20" rx="8" ry="6" fill="#e7f3ee"/><path d="M14 32v8M24 30v10M34 32v8" stroke="#7eb6d6" stroke-width="2" stroke-linecap="round"/>',
+ blanket:'<rect x="8" y="16" width="32" height="20" rx="3" fill="#e07a5f"/><path d="M8 36v4M16 36v4M24 36v4M32 36v4M40 36v4" stroke="#c45c45" stroke-width="2"/>',
+ apple:'<circle cx="24" cy="26" r="12" fill="#e0648c"/><path d="M24 14c4-6 8-6 10-4" fill="none" stroke="#2e6a4e" stroke-width="2"/><ellipse cx="30" cy="12" rx="4" ry="2" fill="#5f9e78"/>',
+ dove:'<ellipse cx="22" cy="26" rx="12" ry="7" fill="#f7f1e4"/><circle cx="32" cy="20" r="5" fill="#f7f1e4"/><polygon points="36,18 44,22 36,24" fill="#efb12a"/><path d="M12 22c-6 2-8 8-2 8" fill="#e7f3ee"/>',
+ seed:'<ellipse cx="24" cy="26" rx="8" ry="12" fill="#7b5a43"/>',
+ sprout:'<path d="M24 40 V22" stroke="#2e6a4e" stroke-width="3"/><ellipse cx="16" cy="20" rx="8" ry="5" fill="#5f9e78"/><ellipse cx="32" cy="16" rx="8" ry="5" fill="#8fbf9a"/>',
+ flower:'<g fill="#e0648c"><circle cx="24" cy="14" r="5"/><circle cx="14" cy="22" r="5"/><circle cx="34" cy="22" r="5"/><circle cx="18" cy="32" r="5"/><circle cx="30" cy="32" r="5"/></g><circle cx="24" cy="24" r="4" fill="#efb12a"/>',
+ bread:'<path d="M8 28c0-10 8-14 16-14s16 4 16 14v8H8z" fill="#e0b089"/><path d="M14 26h4M22 24h4M30 26h4" stroke="#c4922a" stroke-width="2" stroke-linecap="round"/>',
+ basket:'<path d="M10 18h28l-4 20H14z" fill="#c4922a"/><path d="M14 26h20M16 34h16" stroke="#7b5a43" stroke-width="2"/><path d="M16 18c0-8 16-8 16 0" fill="none" stroke="#7b5a43" stroke-width="2"/>',
+ crown:'<path d="M8 34 L8 16 L16 24 L24 12 L32 24 L40 16 L40 34z" fill="#efb12a"/><circle cx="24" cy="20" r="2" fill="#e0648c"/>',
+ scepter:'<path d="M24 40 V16" stroke="#c4922a" stroke-width="3"/><circle cx="24" cy="12" r="6" fill="#efb12a"/>',
+ palace:'<rect x="8" y="20" width="32" height="20" fill="#e7d7c3"/><path d="M8 20 L16 10 L24 20 L32 10 L40 20" fill="#e07a5f"/><rect x="20" y="28" width="8" height="12" fill="#7b5a43"/>',
+ book:'<path d="M8 12h14v26H10a6 6 0 01-2-4z" fill="#3d63b8"/><path d="M40 12H26v26h12a6 6 0 002-4z" fill="#e0648c"/>',
+ shark:'<path d="M4 26c10-2 16-10 28-8 6 1 10 4 12 8-8 2-16 8-28 6-6-1-10-4-12-6z" fill="#7eb6d6"/><path d="M20 18l4 8" fill="#5f9e78"/><circle cx="34" cy="22" r="1.3" fill="#1d2a23"/>',
+ desk:'<rect x="6" y="18" width="36" height="6" rx="1" fill="#7b5a43"/><path d="M12 24v14M36 24v14" stroke="#5c4030" stroke-width="3"/>',
+ lion:'<circle cx="24" cy="24" r="14" fill="#e0b089"/><circle cx="24" cy="24" r="8" fill="#c4922a"/><circle cx="21" cy="22" r="1.2" fill="#1d2a23"/><circle cx="27" cy="22" r="1.2" fill="#1d2a23"/>',
+ window:'<rect x="12" y="10" width="24" height="26" rx="2" fill="#7eb6d6" stroke="#7b5a43" stroke-width="3"/><path d="M24 10v26M12 23h24" stroke="#7b5a43" stroke-width="2"/>',
+ den:'<path d="M4 40 V22 C4 8 44 8 44 22 V40z" fill="#5c4030"/><path d="M14 40 V26 c0-8 20-8 20 0 V40z" fill="#1d2a23"/>'
+};
 function sceneSvg(bits){
-  const colors=["#e07a5f","#efb12a","#3d63b8"],xs=[70,160,250];
-  const shapes=bits.map((name,i)=>`<g transform="translate(${xs[i]},64)"><circle r="20" fill="${colors[i]}"/><text y="38" text-anchor="middle" font-size="13" fill="#1d2a23" font-family="Andika,sans-serif">${esc(name)}</text></g>`).join("");
-  return `<svg class="storyscene" viewBox="0 0 320 150" role="img" aria-label="${esc(bits.join(", "))}"><rect width="320" height="96" fill="#d7ebe3"/><rect y="96" width="320" height="54" fill="#8fbf9a"/><circle cx="270" cy="34" r="16" fill="#efb12a"/>${shapes}</svg>`;
+  const xs=[70,160,250];
+  const shapes=bits.map((name,i)=>`<g transform="translate(${xs[i]-24},42)">${GLYPH[name]||'<circle cx="24" cy="22" r="16" fill="#e0648c"/>'}<text x="24" y="64" text-anchor="middle" font-size="13" fill="#1d2a23" font-family="Andika,sans-serif">${esc(name)}</text></g>`).join("");
+  return `<svg class="storyscene" viewBox="0 0 320 168" role="img" aria-label="${esc(bits.join(", "))}"><rect width="320" height="112" fill="#d7ebe3"/><rect y="112" width="320" height="56" fill="#8fbf9a"/><circle cx="286" cy="26" r="14" fill="#efb12a"/>${shapes}</svg>`;
 }
 function read(id){
   const s=byId(id),tricks=trickSet(s),scene=SCENES[id];
@@ -1224,6 +1280,7 @@ function finish({id,title,firsts,again,unit,skills}){
   const total=firsts.length,right=firsts.filter(Boolean).length,stars=starsFor(right,total);
   const unitsBefore=UNITS.map(u=>unitOpen(u.n)),shelfBefore=LEVELS.map(L=>shelfOpen(L.n));
   const prev=S.best[id]||{stars:0,score:0,tries:0};
+  const unitBefore=unit?unitStars(unit):0,unitFull=unit?unitMax(unit):0;
   const badgesBefore=new Set(badgeList().filter(b=>b.got).map(b=>b.n));
   const newBest=Math.max(prev.stars,stars);
   const gained=newBest-prev.stars;
@@ -1246,18 +1303,20 @@ function finish({id,title,firsts,again,unit,skills}){
       ${starsRow(3)}<span class="${stars===3?"me":""}">All ${total} right on the first try</span>
       ${starsRow(2)}<span class="${stars===2?"me":""}">${Math.ceil(total*2/3)} or more right on the first try</span>
       ${starsRow(1)}<span class="${stars===1?"me":""}">You finished!</span></div>`;
-  const petals=[...Array(10)].map((_,i)=>`<i style="--x:${(i-5)*18}px;background:${i%2?"var(--leaf)":"var(--blossom)"};animation-delay:${i*0.05}s"></i>`).join("");
+  const justUnit=unit&&unitBefore<unitFull&&unitStars(unit)===unitFull;
+  const petals=[...Array(14)].map((_,i)=>`<i style="--x:${(i-7)*22}px;background:${["var(--blossom)","var(--leaf)","var(--sun)"][i%3]};animation-delay:${i*0.04}s"></i>`).join("");
   go(`<section class="page result">
-      <div class="confetti" aria-hidden="true">${petals}</div>
       <h2>You did it!</h2>
+      <div class="confetti" aria-hidden="true">${petals}</div>
+      <div class="flywrap"><div class="minitree ${gained>0?"land":""}">${treeSvg(totalStars(),gained)}</div>${gained>0?`<span class="flystar go">${starSvg(true)}</span>`:""}</div>
       <div class="buddy">${BUDDY}<span>${esc(warm)}</span></div>
-      <div class="flywrap">${gained>0?`<span class="flystar">${starSvg(true)}</span>`:""}<div class="minitree">${treeSvg(totalStars(),gained)}</div></div>
       <div class="bigstars">${[0,1,2].map(k=>starSvg(k<stars,k<stars?"pop":"",`animation-delay:${k*.25}s`)).join("")}</div>
       <p class="q">${esc(title)}</p>
       <p class="q">${msg}</p>
       <p class="tip">${right} of ${total} right on the first try = ${stars} star${stars>1?"s":""}</p>
       ${gainLine}${nextGoal}${key}
       ${newBadges.map(b=>`<div class="gain pop">${badgeIcon(b)}<span>New badge: ${esc(b.n)}!</span></div>`).join("")}
+      ${justUnit?`<div class="unlock">Unit ${unit.n} is complete!</div>`:""}
       ${newUnits.map(u=>`<div class="unlock">Unit ${u.n} is open: ${esc(u.title)}!</div>`).join("")}
       ${newShelf.map(L=>`<div class="unlock">Story Shelf Level ${L.n}, ${L.name}, is open!</div>`).join("")}
       <div class="row"><button class="btn" id="again">Try again</button><button class="btn go" id="tree">Grow my tree</button></div>
@@ -1265,7 +1324,19 @@ function finish({id,title,firsts,again,unit,skills}){
   document.getElementById("again").onclick=again;
   document.getElementById("tree").onclick=home;
   chime("bloom");
-  if(canSpeak)say("You did it! "+(gained>0?warm+" ":"")+msg,0.9);
+  if(canSpeak)setTimeout(()=>say("You did it! "+(gained>0?warm+" ":"")+msg,0.9),650);
+}
+function cheer(line,next){
+  const petals=[...Array(12)].map((_,i)=>`<i style="--x:${(i-6)*24}px;background:${i%2?"var(--leaf)":"var(--blossom)"};animation-delay:${i*0.04}s"></i>`).join("");
+  go(`<section class="page result">
+      <h2>You did it!</h2>
+      <div class="confetti" aria-hidden="true">${petals}</div>
+      <div class="buddy">${BUDDY}<span>${esc(line)}</span></div>
+      <button class="btn go" id="next">Keep going</button>
+    </section>`);
+  document.getElementById("next").onclick=next;
+  chime("bloom");
+  if(canSpeak)setTimeout(()=>say("You did it! "+line,0.9),500);
 }
 
 /* ---- Badges: shown on her home screen, announced on the result screen ---- */
@@ -1442,7 +1513,14 @@ function admin(noPull,keepScroll){
        <p class="tip">Choose a family code and this log will show up on any phone where you type the same code. It also resets the PIN if you forget it.</p>
        ${homeScreen}
        <div class="row" style="justify-content:flex-start"><button class="btn" id="changeCode">Choose a family code</button></div></section>`;
+  const nameCard=`<section class="page" id="namecard" style="gap:10px"><h3>Her name</h3>
+    <p class="tip">The home screen uses this name. It stays if you start over.</p>
+    <div class="row" style="justify-content:flex-start">
+      <input class="pin code" id="childname" maxlength="24" value="${esc(childName())}" autocomplete="off" aria-label="Her name">
+      <button class="btn" id="savename">Save name</button>
+    </div></section>`;
   go(`<div class="bar"><button class="btn" id="back">${ICON.lock} Lock and go home</button><span class="tip">For grown-ups · Lesson Log</span></div>
+    ${nameCard}
     ${todayCard}
     <div class="stats">
       <div class="stat">${ICON.book}<span class="big">${week}</span><span>lesson${week===1?"":"s"} this week</span></div>
@@ -1462,12 +1540,6 @@ function admin(noPull,keepScroll){
     <details class="grown"><summary>All activities and settings</summary><div class="gbody">
       <div class="tablewrap"><table><thead><tr><th>Where</th><th>Activity</th><th>Best</th><th>Stars</th><th>Tries</th><th>Last</th></tr></thead><tbody>${rows}</tbody></table></div>
       <p class="small">Stars: all right on the first try = 3, two-thirds or more = 2, finishing = 1. Only the best result counts, and every star is one blossom, so a retry can only add blossoms. The Sound Units follow the Fundations Level 2 order, so practice matches class.</p>
-      <label for="childname">Her name on the tree</label>
-      <div class="row" style="justify-content:flex-start">
-        <input class="pin code" id="childname" maxlength="24" value="${esc(childName())}" autocomplete="off" aria-label="Her name">
-        <button class="btn" id="savename">Save name</button>
-      </div>
-      <p class="tip">The home screen says this name. It stays if you start over.</p>
       <div class="row" style="justify-content:flex-start">
         <button class="btn" id="unlockAll">${S.unlockAll?"Use normal unlocking":"Open all units and levels"}</button>
         <button class="btn" id="changePin">Change PIN</button>
@@ -1491,6 +1563,7 @@ function admin(noPull,keepScroll){
     if(v!==childName()||!S.childName){S.childName=v;S.nameAt=Date.now();save()}
     admin(true,true);
   };
+  if(openName){openName=false;const nm=document.getElementById("childname");if(nm){nm.focus();nm.select()}}
   document.getElementById("changePin").onclick=()=>gate(true);
   document.getElementById("changeCode").onclick=codeScreen;
   const sn=document.getElementById("syncNow");if(sn)sn.onclick=()=>{sync.status="busy";admin(true);push()};
