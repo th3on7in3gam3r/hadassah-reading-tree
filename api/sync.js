@@ -339,12 +339,45 @@ function fileStore(file) {
   };
 }
 
+/* Bible Fun Land Supabase project: table public.tree_sync, reached only through the
+   tree_sync_get / tree_sync_cas functions. The anon key is public by design (row security
+   blocks the table itself), so it lives here and the site needs no extra settings.
+   SUPABASE_URL / SUPABASE_ANON_KEY override it. */
+const BFL_SUPABASE_URL = "https://webvlwfqhvioenlhketh.supabase.co";
+const BFL_SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndlYnZsd2ZxaHZpb2VubGhrZXRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczOTg2NzgsImV4cCI6MjA2Mjk3NDY3OH0.sOl89hEIqqX1xYKKi_PB0Ck9YFyyL4O182PyQl4zftc";
+
+function supabaseStore(url, key) {
+  async function rpc(fn, args) {
+    const r = await fetch(`${url}/rest/v1/rpc/${fn}`, {
+      method: "POST",
+      headers: { apikey: key, Authorization: "Bearer " + key, "Content-Type": "application/json" },
+      body: JSON.stringify(args),
+    });
+    const text = await r.text();
+    if (!r.ok) throw new Error(`database ${r.status}`);
+    return text ? JSON.parse(text) : null;
+  }
+  return {
+    async get(k) {
+      const v = await rpc("tree_sync_get", { p_key: k });
+      return v == null ? null : String(v);
+    },
+    async compareAndSet(k, oldRaw, nextRaw) {
+      return (await rpc("tree_sync_cas", { p_key: k, p_old: oldRaw || "", p_new: nextRaw })) === true;
+    },
+  };
+}
+
 function openStore(options) {
   const allowFile = options && options.allowFile;
   if (upstashEnv()) return upstashStore();
   if (process.env.REDIS_URL) return redisStore(process.env.REDIS_URL);
-  if (allowFile) return fileStore(path.join(__dirname, "..", "data", "progress.json"));
-  return null;
+  if (process.env.SYNC_STORE === "file" && allowFile) return fileStore(path.join(__dirname, "..", "data", "progress.json"));
+  return supabaseStore(
+    process.env.SUPABASE_URL || BFL_SUPABASE_URL,
+    process.env.SUPABASE_ANON_KEY || BFL_SUPABASE_ANON_KEY
+  );
 }
 
 async function handleRequest(store, method, rawCode, body) {
